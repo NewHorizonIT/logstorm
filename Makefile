@@ -3,11 +3,12 @@
 # ==============================
 
 REDPANDA_CONTAINER ?= deployments-redpanda-1
-CLICKHOUSE_CONTAINER ?= clickhouse
+CLICKHOUSE_CONTAINER ?= deployments-clickhouse-1
 
 DOCKER_RPK = docker exec -it $(REDPANDA_CONTAINER) rpk
 DOCKER_CH  = docker exec -it $(CLICKHOUSE_CONTAINER) clickhouse-client
 DEPLOYMENT_DIR ?= deployments
+CMD_DIR ?= cmd
 
 # ==============================
 # INTERNAL FUNCTION
@@ -24,11 +25,11 @@ endef
 # REDPANDA
 # ==============================
 
-.PHONY: topic-create topic-delete topic-list topic-produce topic-consume
+.PHONY: topic-create topic-delete topic-list topic-produce topic-consume ch-query ch-file table-drop
 
 topic-create:
 	$(call require_var,TOPIC_NAME)
-	$(DOCKER_RPK) topic create $(TOPIC_NAME)
+	$(DOCKER_RPK) topic create $(TOPIC_NAME) --partitions 6 
 
 topic-delete:
 	$(call require_var,TOPIC_NAME)
@@ -48,8 +49,6 @@ topic-consume:
 # ==============================
 # CLICKHOUSE
 # ==============================
-
-.PHONY: ch-query ch-file table-drop
 
 ch-query:
 	$(call require_var,QUERY)
@@ -77,6 +76,13 @@ down:
 
 reset:
 	cd $(DEPLOYMENT_DIR) && docker compose down -v && docker compose up -d
+build:
+	go build -o bin/server cmd/server/main.go
+run: build
+	./bin/server
+
+test:
+	cd ./tests && run_tests.sh
 
 # ==============================
 # HELP
