@@ -9,6 +9,7 @@ type Config struct {
 	Kafka      KafkaConfig
 	ClickHouse ClickHouseConfig
 	Retry      RetryConfig
+	Database   DatabaseConfig
 }
 
 type ServerConfig struct {
@@ -37,4 +38,13 @@ type RetryConfig struct {
 	MaxRetries int           `mapstructure:"RETRY_MAX_RETRIES"`
 	BaseDelay  time.Duration `mapstructure:"RETRY_BASE_DELAY"`
 	MaxDelay   time.Duration `mapstructure:"RETRY_MAX_DELAY"`
+}
+
+type DatabaseConfig struct {
+	Host     string `mapstructure:"DB_HOST"`
+	User     string `mapstructure:"DB_USER"`
+	Password string `mapstructure:"DB_PASSWORD"`
+	Name     string `mapstructure:"DB_NAME"`
+	Port     string `mapstructure:"DB_PORT"`
+	SSLMode  string `mapstructure:"DB_SSL_MODE"`
 }

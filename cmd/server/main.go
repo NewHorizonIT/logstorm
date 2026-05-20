@@ -11,6 +11,7 @@ import (
 	"github.com/NewHorizonIT/logstorm/internal/config"
 	"github.com/NewHorizonIT/logstorm/internal/infra/clickhouse"
 	"github.com/NewHorizonIT/logstorm/internal/infra/kafka"
+	"github.com/NewHorizonIT/logstorm/internal/infra/postgres"
 	"github.com/NewHorizonIT/logstorm/internal/observability"
 	"github.com/NewHorizonIT/logstorm/internal/services/ingestion"
 	"github.com/NewHorizonIT/logstorm/internal/services/processor"
@@ -64,11 +65,16 @@ func main() {
 		MaxDelay:   cfg.Retry.MaxDelay,
 	}
 
+	// Connect database
+	db := postgres.Connect(&cfg.Database)
+
+	slog.Info("[POSTGES]::Connected", db)
+
 	// Repository
 	repository := clickhouse.NewLogStormRepository(chConn, retryCnf, publisher)
 
 	// Processor
-	proc := processor.NewProcessor(consumer, repository)
+	proc := processor.NewProcessor(consumer, repository, publisher)
 
 	// Start processor in background
 	go func() {

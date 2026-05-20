@@ -39,6 +39,10 @@ func (kc *KafkaConsumer) Consume(ctx context.Context, topic string, handler even
 					slog.Error("handler error", "topic", r.Topic, "partition", r.Partition, "offset", r.Offset, "error", err)
 				}
 			})
+
+			if err := kc.client.CommitUncommittedOffsets(ctx); err != nil {
+				slog.Error("failed to commit offsets", "error", err)
+			}
 		}
 	}
 }

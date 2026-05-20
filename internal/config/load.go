@@ -41,6 +41,14 @@ func Load() (*Config, error) {
 			BaseDelay:  viper.GetDuration("RETRY_BASE_DELAY"),
 			MaxDelay:   viper.GetDuration("RETRY_MAX_DELAY"),
 		},
+		Database: DatabaseConfig{
+			Host:     viper.GetString("DB_HOST"),
+			User:     viper.GetString("DB_USER"),
+			Password: viper.GetString("DB_PASSWORD"),
+			Name:     viper.GetString("DB_NAME"),
+			Port:     viper.GetString("DB_PORT"),
+			SSLMode:  viper.GetString("DB_SSL_MODE"),
+		},
 	}
 
 	return cfg, nil
@@ -70,6 +78,8 @@ func setDefaults() {
 	viper.SetDefault("RETRY_MAX_RETRIES", 3)
 	viper.SetDefault("RETRY_BASE_DELAY", "100ms")
 	viper.SetDefault("RETRY_MAX_DELAY", "5s")
+
+	// Database default
 }
 
 func parseStringSlice(s string) []string {

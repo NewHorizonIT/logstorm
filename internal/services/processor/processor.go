@@ -15,6 +15,7 @@ import (
 
 const (
 	LogsTopic     = "logs-topic"
+	DLQTopic      = "dlq-log"
 	BatchSize     = 100             // Number of logs per batch
 	FlushInterval = 5 * time.Second // Max time to wait before flushing
 )
@@ -22,16 +23,18 @@ const (
 type Processor struct {
 	consumer   event.IConsumer
 	repository domain.ILogStorm
+	publisher  event.IPublisher
 
 	// Batch buffer
 	mu     sync.Mutex
 	buffer []domain.Log
 }
 
-func NewProcessor(consumer event.IConsumer, repository domain.ILogStorm) *Processor {
+func NewProcessor(consumer event.IConsumer, repository domain.ILogStorm, publisher event.IPublisher) *Processor {
 	return &Processor{
 		consumer:   consumer,
 		repository: repository,
+		publisher:  publisher,
 		buffer:     make([]domain.Log, 0, BatchSize),
 	}
 }
@@ -50,6 +53,9 @@ func (p *Processor) handleMessage(ctx context.Context, key, value []byte) error 
 	if err := pkg.BytesToJson(value, &rawLog); err != nil {
 		slog.Error("failed to parse log", "error", err)
 		observability.KafkaConsumeTotal.WithLabelValues(LogsTopic, "error").Inc()
+		if pubErr := p.publisher.Publish(ctx, DLQTopic, key, value); pubErr != nil {
+			slog.Error("failed to send unparseable message to DLQ", "error", pubErr)
+		}
 		return err
 	}
 
