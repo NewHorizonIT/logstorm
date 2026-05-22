@@ -20,15 +20,29 @@ func NewAuthRepository(db *gorm.DB) AuthRepository {
 
 // CreateAccount implements [AuthRepository].
 func (a *authRepository) CreateAccount(ctx context.Context, account *Account) error {
-	panic("unimplemented")
+	err := a.db.WithContext(ctx).Create(account).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetAccountByEmail implements [AuthRepository].
 func (a *authRepository) GetAccountByEmail(ctx context.Context, email string) (*Account, error) {
-	panic("unimplemented")
+	var account Account
+	err := a.db.WithContext(ctx).Where("email = ?", email).First(&account).Error
+	if err != nil {
+		return nil, err
+	}
+	return &account, nil
 }
 
 // GetAccountByID implements [AuthRepository].
-func (a *authRepository) GetAccountByID(ctx context.Context, id string) (*Account, error) {
-	panic("unimplemented")
+func (a *authRepository) GetAccountByID(ctx context.Context, id int) (*Account, error) {
+	var account Account
+	err := a.db.WithContext(ctx).Where("id = ?", id).First(&account).Error
+	if err != nil {
+		return nil, err
+	}
+	return &account, nil
 }

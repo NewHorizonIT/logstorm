@@ -10,6 +10,7 @@ type Config struct {
 	ClickHouse ClickHouseConfig
 	Retry      RetryConfig
 	Database   DatabaseConfig
+	JWTConfig  JWTConfig
 }
 
 type ServerConfig struct {
@@ -47,4 +48,8 @@ type DatabaseConfig struct {
 	Name     string `mapstructure:"DB_NAME"`
 	Port     string `mapstructure:"DB_PORT"`
 	SSLMode  string `mapstructure:"DB_SSL_MODE"`
+}
+
+type JWTConfig struct {
+	Secret string `mapstructure:"JWT_SECRET"`
 }

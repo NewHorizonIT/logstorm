@@ -9,10 +9,12 @@ import (
 	"time"
 
 	"github.com/NewHorizonIT/logstorm/internal/config"
+	"github.com/NewHorizonIT/logstorm/internal/global"
 	"github.com/NewHorizonIT/logstorm/internal/infra/clickhouse"
 	"github.com/NewHorizonIT/logstorm/internal/infra/kafka"
 	"github.com/NewHorizonIT/logstorm/internal/infra/postgres"
 	"github.com/NewHorizonIT/logstorm/internal/observability"
+	"github.com/NewHorizonIT/logstorm/internal/services/auth"
 	"github.com/NewHorizonIT/logstorm/internal/services/ingestion"
 	"github.com/NewHorizonIT/logstorm/internal/services/processor"
 	"github.com/gin-gonic/gin"
@@ -25,6 +27,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	global.GlobalConfig = *cfg
+
+	slog.Info("configuration loaded", "config", cfg)
 
 	// Context and signal handling for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
@@ -70,6 +75,15 @@ func main() {
 
 	slog.Info("[POSTGES]::Connected", db)
 
+	// Auth service
+	if err := db.AutoMigrate(&auth.Account{}); err != nil {
+		panic(err)
+	}
+	authRepo := auth.NewAuthRepository(db)
+	authUsecase := auth.NewAuthUsecase(authRepo)
+	authHandler := auth.NewAuthHandler(authUsecase)
+	authRouter := auth.NewAuthRouter(authHandler)
+
 	// Repository
 	repository := clickhouse.NewLogStormRepository(chConn, retryCnf, publisher)
 
@@ -97,6 +111,10 @@ func main() {
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	// Auth routes
+	authGroup := router.Group("/auth")
+	authRouter.RegisterRoutes(authGroup)
 
 	// Ingestion routes
 	ingestionGroup := router.Group("/ingestion")

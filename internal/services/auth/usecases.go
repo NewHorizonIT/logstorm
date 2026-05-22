@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/NewHorizonIT/logstorm/pkg"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,14 +20,34 @@ func NewAuthUsecase(repo AuthRepository) AuthUsecase {
 
 // Login implements [AuthUsecase].
 func (a *authUsecase) Login(ctx context.Context, email string, password string) (string, error) {
-	return "", errors.New("not implemented")
+	account, err := a.authRepo.GetAccountByEmail(ctx, email)
+	if err != nil {
+		return "", errors.New("invalid credentials")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password))
+	if err != nil {
+		return "", errors.New("invalid credentials")
+	}
+
+	// Generate JWT token
+	token, err := pkg.GenerateToken(account.ID)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 // Register implements [AuthUsecase].
-func (a *authUsecase) Register(ctx context.Context, email string, password string) error {
+func (a *authUsecase) Register(ctx context.Context, email string, password string) (string, error) {
+	account, err := a.authRepo.GetAccountByEmail(ctx, email)
+	if err == nil && account != nil {
+		return "", errors.New("email already in use")
+	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	user := &Account{
@@ -34,5 +55,13 @@ func (a *authUsecase) Register(ctx context.Context, email string, password strin
 		Password: string(hash),
 	}
 
-	return a.authRepo.CreateAccount(ctx, user)
+	err = a.authRepo.CreateAccount(ctx, user)
+	if err != nil {
+		return "", err
+	}
+
+	// generate token for the new user
+	token, err := pkg.GenerateToken(user.ID)
+
+	return token, nil
 }
