@@ -1,10 +1,12 @@
 import { Sidebar } from "@/components/Sidebar";
+import { useState } from "react";
 import { Outlet } from "react-router";
 
 const MainLayout = () => {
+  const [collapsed, setCollapsed] = useState(false);
   return (
     <div className="relative flex min-h-screen bg-[radial-gradient(circle_at_15%_20%,rgba(59,130,246,0.12),transparent_45%),radial-gradient(circle_at_85%_0%,rgba(209,105,0,0.12),transparent_30%),var(--color-bg)] text-[--color-text-primary]">
-      <Sidebar />
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <div className="ml-60 flex min-h-screen flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center border-b border-[--color-border] bg-[--color-card]/85 px-6 backdrop-blur-md">

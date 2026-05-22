@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/utils/cn";
 
-type BadgeType = "error" | "warn" | "info";
+type BadgeType = "error" | "warn" | "info" | "debug" | "fatal";
 
 type Props = {
   type: BadgeType;
@@ -10,9 +10,11 @@ type Props = {
 };
 
 const typeClass: Record<BadgeType, string> = {
+  fatal: "border-rose-400/50 bg-rose-700/20 text-rose-100",
   error: "border-rose-300/30 bg-rose-500/15 text-rose-200",
   warn: "border-amber-300/30 bg-amber-500/15 text-amber-200",
   info: "border-cyan-300/30 bg-cyan-500/15 text-cyan-200",
+  debug: "border-slate-300/20 bg-slate-500/10 text-slate-400",
 };
 
 export const Badge = ({ type, children, className }: Props) => {

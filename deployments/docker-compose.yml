@@ -22,13 +22,17 @@ services:
     ports:
       - "8123:8123"
       - "9000:9000"
+    environment:
+      CLICKHOUSE_DB: logstorm
+      CLICKHOUSE_USER: logstorm
+      CLICKHOUSE_PASSWORD: logstorm_password
     ulimits:
       nofile:
         soft: 262144
         hard: 262144
     volumes:
       - clickhouse-data:/var/lib/clickhouse
-      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./deployments/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
 
   # Prometheus for monitoring
@@ -67,7 +71,7 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: mydb
     ports:
-      - "5431:5432"
+      - "5430:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped

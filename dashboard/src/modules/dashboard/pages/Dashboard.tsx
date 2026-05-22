@@ -1,5 +1,8 @@
 
 import { Card } from "@/components/Card";
+import Sparkline from "@/components/Sparkline";
+import { useEffect, useState } from "react";
+import api from "@/services/api";
 
 type Metric = {
   label: string;
@@ -63,10 +66,40 @@ const recentErrors: RecentError[] = [
 ];
 
 const Dashboard = () => {
+  const [processedTotal, setProcessedTotal] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchMetrics = async () => {
+      try {
+        const res = await api.get("/metrics", { responseType: "text" });
+        const m = res.data.match(/logstorm_logs_processed_total\s+(\d+(?:\.\d+)?)/);
+        if (m && mounted) {
+          setProcessedTotal(Number(m[1]).toLocaleString());
+        }
+      } catch (err) {
+        // ignore network errors — keep mock data
+      }
+    };
+
+    fetchMetrics();
+    const id = setInterval(fetchMetrics, 15000);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, []);
+
+  const displayMetrics = metrics.map((m) => ({ ...m }));
+  if (processedTotal) {
+    displayMetrics[0] = { label: "Logs processed", value: processedTotal, delta: displayMetrics[0].delta };
+  }
+
   return (
     <div className="space-y-6">
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {metrics.map((metric) => (
+        {displayMetrics.map((metric) => (
           <Card key={metric.label} variant="elevated">
             <p className="text-sm text-[--color-text-secondary]">{metric.label}</p>
             <p className="mt-2 text-2xl font-semibold text-[--color-text-primary]">{metric.value}</p>
@@ -80,7 +113,13 @@ const Dashboard = () => {
           <h2 className="text-lg font-semibold text-[--color-text-primary]">Traffic Overview</h2>
           <span className="text-sm text-[--color-text-secondary]">Chart placeholder</span>
         </div>
-        <div className="h-72 rounded-[--radius-md] border border-dashed border-[--color-border] bg-[color-mix(in_srgb,var(--color-card),white_4%)]" />
+        <div className="h-72 rounded-[--radius-md] border border-[--color-border] bg-[color-mix(in_srgb,var(--color-card),white_4%)] p-3">
+          {(() => {
+            const base = processedTotal ? Number(processedTotal.replace(/,/g, "")) : 12480;
+            const series = Array.from({ length: 24 }, (_) => Math.round(base * (0.6 + Math.random() * 0.8)));
+            return <Sparkline data={series} height={160} />;
+          })()}
+        </div>
       </Card>
 
       <section className="grid gap-6 xl:grid-cols-2">

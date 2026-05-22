@@ -48,7 +48,13 @@ export const AuthForm = ({ type, onSubmit }: Props) => {
         </p>
       </header>
 
-      <div className="mt-8 space-y-4">
+      <form
+        className="mt-8 space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-300">Email</label>
           <input
@@ -100,14 +106,13 @@ export const AuthForm = ({ type, onSubmit }: Props) => {
         )}
 
         <button
-          type="button"
+          type="submit"
           className="h-11 w-full rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-sm font-semibold text-white shadow-[0_10px_25px_-12px_rgba(6,182,212,0.9)] transition enabled:hover:brightness-110 enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45"
           disabled={!email.trim() || !password.trim() || isSubmitting}
-          onClick={handleSubmit}
         >
           {isSubmitting ? "Please wait..." : isLogin ? "Sign in" : "Create account"}
         </button>
-      </div>
+      </form>
 
       <div className="mt-6 border-t border-slate-800 pt-5 text-sm text-slate-400">
         {isLogin ? (
