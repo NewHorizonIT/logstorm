@@ -18,7 +18,6 @@ import (
 	"github.com/NewHorizonIT/logstorm/internal/services/ingestion"
 	"github.com/NewHorizonIT/logstorm/internal/services/processor"
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -105,7 +104,7 @@ func main() {
 	router.Use(observability.PrometheusMiddleware())
 
 	// Metrics endpoint for Prometheus
-	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	// router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
