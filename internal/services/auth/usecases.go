@@ -3,16 +3,17 @@ package auth
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/NewHorizonIT/logstorm/pkg"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type authUsecase struct {
-	authRepo AuthRepository
+	authRepo AccountRepository
 }
 
-func NewAuthUsecase(repo AuthRepository) AuthUsecase {
+func NewAuthUsecase(repo AccountRepository) AuthUsecase {
 	return &authUsecase{
 		authRepo: repo,
 	}
@@ -25,13 +26,17 @@ func (a *authUsecase) Login(ctx context.Context, email string, password string) 
 		return "", errors.New("invalid credentials")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password))
+	if account == nil {
+		return "", errors.New("invalid credentials")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(account.PasswordHash), []byte(password))
 	if err != nil {
 		return "", errors.New("invalid credentials")
 	}
 
 	// Generate JWT token
-	token, err := pkg.GenerateToken(account.ID)
+	token, err := pkg.GenerateToken(account.ID, 15*time.Minute)
 	if err != nil {
 		return "", err
 	}
@@ -40,28 +45,46 @@ func (a *authUsecase) Login(ctx context.Context, email string, password string) 
 }
 
 // Register implements [AuthUsecase].
-func (a *authUsecase) Register(ctx context.Context, email string, password string) (string, error) {
+func (a *authUsecase) Register(ctx context.Context, email string, password string) (*RegisterResult, error) {
 	account, err := a.authRepo.GetAccountByEmail(ctx, email)
-	if err == nil && account != nil {
-		return "", errors.New("email already in use")
+
+	if err != nil {
+		return nil, err
 	}
+
+	if account != nil {
+		return nil, errors.New("email already in use")
+	}
+
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", err
+		return nil, errors.New("failed to hash password")
 	}
 
 	user := &Account{
-		Email:    email,
-		Password: string(hash),
+		Email:        email,
+		PasswordHash: string(hash),
 	}
 
 	err = a.authRepo.CreateAccount(ctx, user)
 	if err != nil {
-		return "", err
+		return nil, errors.New("failed to create account")
 	}
 
 	// generate token for the new user
-	token, err := pkg.GenerateToken(user.ID)
+	accessToken, err := pkg.GenerateToken(user.ID, 15*time.Minute) // Token valid for 15 minutes
+	if err != nil {
+		return nil, errors.New("failed to generate access token")
+	}
 
-	return token, nil
+	refreshToken, err := pkg.GenerateToken(user.ID, 7*24*time.Hour) // Refresh token valid for 7 days
+	if err != nil {
+		return nil, errors.New("failed to generate refresh token")
+	}
+
+	return &RegisterResult{
+		Account:      user,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }

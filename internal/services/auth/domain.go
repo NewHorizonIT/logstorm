@@ -7,20 +7,20 @@ import (
 
 // Define the domain Account
 type Account struct {
-	ID        int
-	Email     string
-	Password  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID           int
+	Email        string
+	PasswordHash string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // Define UseCase for service Auth
 type AuthUsecase interface {
 	Login(ctx context.Context, email, password string) (string, error)
-	Register(ctx context.Context, email, password string) (string, error)
+	Register(ctx context.Context, email, password string) (*RegisterResult, error)
 }
 
-type AuthRepository interface {
+type AccountRepository interface {
 	// Define methods for authentication repository here
 	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
 	CreateAccount(ctx context.Context, account *Account) error
