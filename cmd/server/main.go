@@ -72,7 +72,7 @@ func main() {
 	// Connect database
 	db := postgres.Connect(&cfg.Database)
 
-	slog.Info("[POSTGES]::Connected", db)
+	slog.Info("[POSTGES]::Connected")
 
 	// Auth service
 	if err := db.AutoMigrate(&auth.Account{}); err != nil {
