@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/NewHorizonIT/logstorm/internal/global"
 	auth "github.com/NewHorizonIT/logstorm/internal/services/auth"
+	"github.com/NewHorizonIT/logstorm/pkg"
 )
 
 type mockRepo struct {
@@ -267,6 +269,83 @@ func TestAuthUsecase_Register(t *testing.T) {
 			context.Background(),
 			"user@e.com",
 			"password123",
+		)
+
+		if err == nil {
+			t.Fatal("expected error")
+		}
+	})
+}
+
+func TestAuthUsecase_Refresh(t *testing.T) {
+	global.GlobalConfig.JWTConfig.Secret = "test-secret"
+
+	t.Run("success", func(t *testing.T) {
+		u := auth.NewAuthUsecase(nil)
+
+		refreshToken, err := pkg.GenerateToken(
+			123,
+			7*24*time.Hour,
+		)
+
+		if err != nil {
+			t.Fatalf("failed to create test token: %v", err)
+		}
+
+		res, err := u.Refresh(
+			context.Background(),
+			refreshToken,
+		)
+
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if res == nil {
+			t.Fatal("expected result")
+		}
+
+		if res.AccessToken == "" {
+			t.Fatal("expected access token")
+		}
+
+		if res.RefreshToken == "" {
+			t.Fatal("expected refresh token")
+		}
+
+		if res.AccessToken == refreshToken {
+			t.Fatal("access token should be newly generated")
+		}
+	})
+
+	t.Run("invalid_token", func(t *testing.T) {
+		u := auth.NewAuthUsecase(nil)
+
+		_, err := u.Refresh(
+			context.Background(),
+			"this-is-not-a-jwt",
+		)
+
+		if err == nil {
+			t.Fatal("expected error")
+		}
+	})
+
+	t.Run("expired_token", func(t *testing.T) {
+		u := auth.NewAuthUsecase(nil)
+
+		expiredToken, err := pkg.GenerateToken(
+			123,
+			-time.Minute,
+		)
+
+		if err != nil {
+			t.Fatalf("failed to create token: %v", err)
+		}
+
+		_, err = u.Refresh(
+			context.Background(),
+			expiredToken,
 		)
 
 		if err == nil {

@@ -88,3 +88,31 @@ func (a *authUsecase) Register(ctx context.Context, email string, password strin
 		RefreshToken: refreshToken,
 	}, nil
 }
+
+// Refresh implements [AuthUsecase].
+func (a *authUsecase) Refresh(ctx context.Context, refreshToken string) (*HandleRefreshTokenResult, error) {
+	// Step 1: Verify the refresh token and get the user ID
+	payload, err := pkg.VerifyToken(refreshToken)
+	if err != nil {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	// Step 2: Get refresh token from Redis and compare with the provided token (implement in future)
+
+	// Step 3:Generate new access token
+	accessToken, err := pkg.GenerateToken(payload.UserID, 15*time.Minute)
+	if err != nil {
+		return nil, errors.New("failed to generate access token")
+	}
+
+	// Step 4: Generate new refresh token
+	newRefreshToken, err := pkg.GenerateToken(payload.UserID, 7*24*time.Hour)
+	if err != nil {
+		return nil, errors.New("failed to generate refresh token")
+	}
+
+	return &HandleRefreshTokenResult{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+	}, nil
+}
