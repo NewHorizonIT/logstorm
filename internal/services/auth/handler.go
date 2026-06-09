@@ -55,6 +55,25 @@ func (ah *AuthHandler) RegisterHandler(c *gin.Context) {
 }
 
 func (ah *AuthHandler) RefreshHandler(c *gin.Context) {
+	// Step 1: Get token from cookie
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "refresh token required"})
+		return
+	}
+	// Step 2: call usecase to refresh tokens
+	result, err := ah.usecase.Refresh(c.Request.Context(), refreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Step 3: set new refresh token cookie
+	c.SetCookie("refresh_token", result.RefreshToken, 7*24*3600, "/", "", false, true)
+
+	// Step 4: return new access token
+	res := HandleRefreshTokenResponse{AccessToken: result.AccessToken}
+	c.JSON(http.StatusOK, res)
 }
 
 func (ah *AuthHandler) LogoutHandler(c *gin.Context) {

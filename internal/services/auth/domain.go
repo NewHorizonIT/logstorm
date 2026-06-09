@@ -18,6 +18,7 @@ type Account struct {
 type AuthUsecase interface {
 	Login(ctx context.Context, email, password string) (string, error)
 	Register(ctx context.Context, email, password string) (*RegisterResult, error)
+	Refresh(ctx context.Context, refreshToken string) (*HandleRefreshTokenResult, error)
 }
 
 type AccountRepository interface {

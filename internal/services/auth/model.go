@@ -30,3 +30,12 @@ type RegisterResponse struct {
 	Account     AccountDTO `json:"account"`
 	AccessToken string     `json:"access_token"`
 }
+
+type HandleRefreshTokenResult struct {
+	AccessToken  string
+	RefreshToken string
+}
+
+type HandleRefreshTokenResponse struct {
+	AccessToken string `json:"access_token"`
+}
