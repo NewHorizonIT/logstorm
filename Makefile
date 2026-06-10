@@ -66,7 +66,7 @@ table-drop:
 # SYSTEM
 # ==============================
 
-.PHONY: up down reset
+.PHONY: up down reset build run test fmt
 
 up:
 	docker compose -f $(DEPLOYMENT_DIR)/docker-compose.yml up -d
@@ -83,6 +83,9 @@ run: build
 
 test:
 	cd ./tests && run_tests.sh
+
+fmt:
+	go fmt ./...
 
 # ==============================
 # HELP

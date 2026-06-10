@@ -11,6 +11,7 @@ type Config struct {
 	Retry      RetryConfig
 	Database   DatabaseConfig
 	JWTConfig  JWTConfig
+	Redis      RedisConfig
 }
 
 type ServerConfig struct {
@@ -52,4 +53,10 @@ type DatabaseConfig struct {
 
 type JWTConfig struct {
 	Secret string `mapstructure:"JWT_SECRET"`
+}
+
+type RedisConfig struct {
+	Addr     string `mapstructure:"REDIS_ADDR"`
+	Password string `mapstructure:"REDIS_PASSWORD"`
+	DB       int    `mapstructure:"REDIS_DB"`
 }

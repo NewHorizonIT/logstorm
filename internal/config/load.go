@@ -49,6 +49,14 @@ func Load() (*Config, error) {
 			Port:     viper.GetString("DB_PORT"),
 			SSLMode:  viper.GetString("DB_SSL_MODE"),
 		},
+		JWTConfig: JWTConfig{
+			Secret: viper.GetString("JWT_SECRET"),
+		},
+		Redis: RedisConfig{
+			Addr:     viper.GetString("REDIS_ADDR"),
+			Password: viper.GetString("REDIS_PASSWORD"),
+			DB:       viper.GetInt("REDIS_DB"),
+		},
 	}
 
 	return cfg, nil
@@ -80,6 +88,17 @@ func setDefaults() {
 	viper.SetDefault("RETRY_MAX_DELAY", "5s")
 
 	// Database default
+	viper.SetDefault("DB_HOST", "localhost")
+	viper.SetDefault("DB_USER", "logstorm")
+	viper.SetDefault("DB_PASSWORD", "123456")
+	viper.SetDefault("DB_NAME", "logstorm")
+	viper.SetDefault("DB_PORT", "5432")
+	viper.SetDefault("DB_SSL_MODE", "disable")
+
+	// Redis defaults
+	viper.SetDefault("REDIS_ADDR", "localhost:6378")
+	viper.SetDefault("REDIS_PASSWORD", "")
+	viper.SetDefault("REDIS_DB", 0)
 }
 
 func parseStringSlice(s string) []string {
