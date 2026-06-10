@@ -88,8 +88,15 @@ services:
     depends_on:
       - redpanda
     restart: unless-stopped
+
+  redis:
+    image: redis:7.0.11
+    ports:
+      - "6378:6379"
+    restart: unless-stopped
 volumes:
   grafana-data:
   prometheus-data:
   clickhouse-data:
   postgres-data:
+  redis-data:
