@@ -22,7 +22,6 @@ type mockUsecase struct {
 	registerErr    error
 	refreshResult  *auth.HandleRefreshTokenResult
 	refreshErr     error
-	logoutResult   *auth.LogoutResult
 	logoutErr      error
 }
 
