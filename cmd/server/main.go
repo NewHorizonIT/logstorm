@@ -61,7 +61,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer chConn.Close()
+	defer func() {
+		if err := chConn.Close(); err != nil {
+			slog.Error("error closing ClickHouse connection", "error", err)
+		}
+	}()
+
+	slog.Info("[CLICKHOUSE]::Connected")
 
 	// Retry config for ClickHouse
 	retryCnf := kafka.RetryCnf{
@@ -77,7 +83,11 @@ func main() {
 
 	// Initialize redis
 	redisClient := redis.NewClient(cfg.Redis)
-	defer redisClient.Close()
+	defer func() {
+		if err := redisClient.Close(); err != nil {
+			slog.Error("error closing Redis client", "error", err)
+		}
+	}()
 
 	slog.Info("[REDIS]::Connected")
 
