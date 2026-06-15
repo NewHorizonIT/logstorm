@@ -143,7 +143,11 @@ func TestRegisterHandler(t *testing.T) {
 
 		// verify cookie
 		res := w.Result()
-		defer res.Body.Close()
+		defer func() {
+			if err := res.Body.Close(); err != nil {
+				t.Fatalf("error closing response body: %v", err)
+			}
+		}()
 		found := false
 		for _, c := range res.Cookies() {
 			if c.Name == "refresh_token" {
