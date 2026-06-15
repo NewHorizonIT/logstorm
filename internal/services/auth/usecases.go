@@ -5,17 +5,20 @@ import (
 	"errors"
 	"time"
 
+	"github.com/NewHorizonIT/logstorm/internal/infra/redis"
 	"github.com/NewHorizonIT/logstorm/pkg"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type authUsecase struct {
-	authRepo AccountRepository
+	authRepo    AccountRepository
+	sessionRepo SessionRepository
 }
 
-func NewAuthUsecase(repo AccountRepository) AuthUsecase {
+func NewAuthUsecase(repo AccountRepository, sessionRepo SessionRepository) AuthUsecase {
 	return &authUsecase{
-		authRepo: repo,
+		authRepo:    repo,
+		sessionRepo: sessionRepo,
 	}
 }
 
@@ -115,4 +118,23 @@ func (a *authUsecase) Refresh(ctx context.Context, refreshToken string) (*Handle
 		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
 	}, nil
+}
+
+// Logout implements [AuthUsecase].
+func (a *authUsecase) Logout(ctx context.Context, refreshToken string) error {
+	// Step 1: Verify the refresh token and get the user ID
+	payload, err := pkg.VerifyToken(refreshToken)
+	if err != nil {
+		return errors.New("invalid refresh token")
+	}
+
+	// Step 2: Delete the refresh token from Redis (implement in future)
+	redisKey := redis.SessionKey(payload.Sid)
+
+	err = a.sessionRepo.DeleteSession(ctx, redisKey)
+	if err != nil {
+		return errors.New("failed to invalidate refresh token")
+	}
+
+	return nil
 }

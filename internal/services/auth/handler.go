@@ -77,4 +77,22 @@ func (ah *AuthHandler) RefreshHandler(c *gin.Context) {
 }
 
 func (ah *AuthHandler) LogoutHandler(c *gin.Context) {
+	// Step 1: Get token from cookie
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "refresh token required"})
+		return
+	}
+
+	// Step 2: call usecase to logout
+	err = ah.usecase.Logout(c.Request.Context(), refreshToken)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Step 3: clear refresh token cookie
+	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }

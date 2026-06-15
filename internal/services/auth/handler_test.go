@@ -22,6 +22,8 @@ type mockUsecase struct {
 	registerErr    error
 	refreshResult  *auth.HandleRefreshTokenResult
 	refreshErr     error
+	logoutResult   *auth.LogoutResult
+	logoutErr      error
 }
 
 func (m *mockUsecase) Login(ctx context.Context, email, password string) (string, error) {
@@ -34,6 +36,10 @@ func (m *mockUsecase) Register(ctx context.Context, email, password string) (*au
 
 func (m *mockUsecase) Refresh(ctx context.Context, refreshToken string) (*auth.HandleRefreshTokenResult, error) {
 	return m.refreshResult, m.refreshErr
+}
+
+func (m *mockUsecase) Logout(ctx context.Context, refreshToken string) error {
+	return m.logoutErr
 }
 
 func TestLoginHandler(t *testing.T) {
@@ -327,6 +333,78 @@ func TestRefreshHandler(t *testing.T) {
 		if w.Code != http.StatusUnauthorized {
 			t.Fatalf(
 				"expected status 401 got %d body=%s",
+				w.Code,
+				w.Body.String(),
+			)
+		}
+	})
+}
+
+func TestLogoutHandler(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	t.Run("success", func(t *testing.T) {
+		mu := &mockUsecase{
+			logoutErr: nil,
+		}
+
+		h := auth.NewAuthHandler(mu)
+
+		r := gin.New()
+		r.POST("/logout", h.LogoutHandler)
+
+		req := httptest.NewRequest(
+			http.MethodPost,
+			"/logout",
+			nil,
+		)
+
+		req.AddCookie(&http.Cookie{
+			Name:  "refresh_token",
+			Value: "valid-refresh-token",
+		})
+
+		w := httptest.NewRecorder()
+
+		r.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf(
+				"expected status 200 got %d body=%s",
+				w.Code,
+				w.Body.String(),
+			)
+		}
+	})
+
+	t.Run("invalid_refresh_token", func(t *testing.T) {
+		mu := &mockUsecase{
+			logoutErr: errors.New("invalid refresh token"),
+		}
+
+		h := auth.NewAuthHandler(mu)
+
+		r := gin.New()
+		r.POST("/logout", h.LogoutHandler)
+
+		req := httptest.NewRequest(
+			http.MethodPost,
+			"/logout",
+			nil,
+		)
+
+		req.AddCookie(&http.Cookie{
+			Name:  "refresh_token",
+			Value: "invalid-refresh-token",
+		})
+
+		w := httptest.NewRecorder()
+
+		r.ServeHTTP(w, req)
+
+		if w.Code != http.StatusInternalServerError {
+			t.Fatalf(
+				"expected status 500 got %d body=%s",
 				w.Code,
 				w.Body.String(),
 			)

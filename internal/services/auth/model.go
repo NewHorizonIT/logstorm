@@ -39,3 +39,5 @@ type HandleRefreshTokenResult struct {
 type HandleRefreshTokenResponse struct {
 	AccessToken string `json:"access_token"`
 }
+type LogoutResult struct {
+}

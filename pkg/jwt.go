@@ -13,6 +13,12 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+type RefreshTokenClaims struct {
+	UserID int    `json:"user_id"`
+	Sid    string `json:"sid"`
+	jwt.RegisteredClaims
+}
+
 func GenerateToken(userID int, expiration time.Duration) (string, error) {
 	jwtSecret := []byte(global.GlobalConfig.JWTConfig.Secret)
 	claims := CustomClaims{
@@ -30,10 +36,10 @@ func GenerateToken(userID int, expiration time.Duration) (string, error) {
 }
 
 // Verify JWT
-func VerifyToken(tokenString string) (*CustomClaims, error) {
+func VerifyToken(tokenString string) (*RefreshTokenClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenString,
-		&CustomClaims{},
+		&RefreshTokenClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(global.GlobalConfig.JWTConfig.Secret), nil
 		},
@@ -43,7 +49,7 @@ func VerifyToken(tokenString string) (*CustomClaims, error) {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(*CustomClaims)
+	claims, ok := token.Claims.(*RefreshTokenClaims)
 	if !ok || !token.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}

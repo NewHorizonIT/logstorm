@@ -63,7 +63,7 @@ func TestAuthUsecase_Login(t *testing.T) {
 			},
 		}
 
-		u := auth.NewAuthUsecase(repo)
+		u := auth.NewAuthUsecase(repo, sessionRepoMock{})
 
 		token, err := u.Login(
 			context.Background(),
@@ -94,7 +94,7 @@ func TestAuthUsecase_Login(t *testing.T) {
 			},
 		}
 
-		u := auth.NewAuthUsecase(repo)
+		u := auth.NewAuthUsecase(repo, sessionRepoMock{})
 
 		_, err := u.Login(
 			context.Background(),
@@ -112,7 +112,7 @@ func TestAuthUsecase_Login(t *testing.T) {
 			acct: nil,
 		}
 
-		u := auth.NewAuthUsecase(repo)
+		u := auth.NewAuthUsecase(repo, sessionRepoMock{})
 
 		_, err := u.Login(
 			context.Background(),
@@ -130,7 +130,7 @@ func TestAuthUsecase_Login(t *testing.T) {
 			getErr: errors.New("database down"),
 		}
 
-		u := auth.NewAuthUsecase(repo)
+		u := auth.NewAuthUsecase(repo, sessionRepoMock{})
 
 		_, err := u.Login(
 			context.Background(),
@@ -155,7 +155,7 @@ func TestAuthUsecase_Register(t *testing.T) {
 			},
 		}
 
-		u := auth.NewAuthUsecase(repo)
+		u := auth.NewAuthUsecase(repo, sessionRepoMock{})
 
 		_, err := u.Register(
 			context.Background(),
@@ -171,7 +171,7 @@ func TestAuthUsecase_Register(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		repo := &mockRepo{}
 
-		u := auth.NewAuthUsecase(repo)
+		u := auth.NewAuthUsecase(repo, sessionRepoMock{})
 
 		res, err := u.Register(
 			context.Background(),
@@ -210,7 +210,7 @@ func TestAuthUsecase_Register(t *testing.T) {
 	t.Run("password_is_hashed", func(t *testing.T) {
 		repo := &mockRepo{}
 
-		u := auth.NewAuthUsecase(repo)
+		u := auth.NewAuthUsecase(repo, sessionRepoMock{})
 
 		_, err := u.Register(
 			context.Background(),
@@ -245,7 +245,7 @@ func TestAuthUsecase_Register(t *testing.T) {
 			getErr: errors.New("database down"),
 		}
 
-		u := auth.NewAuthUsecase(repo)
+		u := auth.NewAuthUsecase(repo, sessionRepoMock{})
 
 		_, err := u.Register(
 			context.Background(),
@@ -263,7 +263,7 @@ func TestAuthUsecase_Register(t *testing.T) {
 			createErr: errors.New("insert failed"),
 		}
 
-		u := auth.NewAuthUsecase(repo)
+		u := auth.NewAuthUsecase(repo, sessionRepoMock{})
 
 		_, err := u.Register(
 			context.Background(),
@@ -281,7 +281,7 @@ func TestAuthUsecase_Refresh(t *testing.T) {
 	global.GlobalConfig.JWTConfig.Secret = "test-secret"
 
 	t.Run("success", func(t *testing.T) {
-		u := auth.NewAuthUsecase(nil)
+		u := auth.NewAuthUsecase(nil, sessionRepoMock{})
 
 		refreshToken, err := pkg.GenerateToken(
 			123,
@@ -319,7 +319,7 @@ func TestAuthUsecase_Refresh(t *testing.T) {
 	})
 
 	t.Run("invalid_token", func(t *testing.T) {
-		u := auth.NewAuthUsecase(nil)
+		u := auth.NewAuthUsecase(nil, sessionRepoMock{})
 
 		_, err := u.Refresh(
 			context.Background(),
@@ -332,7 +332,7 @@ func TestAuthUsecase_Refresh(t *testing.T) {
 	})
 
 	t.Run("expired_token", func(t *testing.T) {
-		u := auth.NewAuthUsecase(nil)
+		u := auth.NewAuthUsecase(nil, sessionRepoMock{})
 
 		expiredToken, err := pkg.GenerateToken(
 			123,
@@ -344,6 +344,87 @@ func TestAuthUsecase_Refresh(t *testing.T) {
 		}
 
 		_, err = u.Refresh(
+			context.Background(),
+			expiredToken,
+		)
+
+		if err == nil {
+			t.Fatal("expected error")
+		}
+	})
+}
+
+func (m *mockRepo) StoreRefreshToken(ctx context.Context, sid string, userID int, expiration time.Duration) error {
+	return nil
+}
+
+// Mock session repository for testing Logout
+type sessionRepoMock struct {
+}
+
+func (s sessionRepoMock) StoreRefreshToken(ctx context.Context, sid string, userID int, expiration time.Duration) error {
+	return nil
+}
+
+func (s sessionRepoMock) DeleteSession(ctx context.Context, sid string) error {
+	return nil
+}
+
+func (s sessionRepoMock) GetUserIDBySID(ctx context.Context, sid string) (int, error) {
+	return 123, nil
+}
+
+func TestAuthUsecase_Logout(t *testing.T) {
+	global.GlobalConfig.JWTConfig.Secret = "test-secret"
+
+	t.Run("success", func(t *testing.T) {
+		u := auth.NewAuthUsecase(nil, sessionRepoMock{})
+
+		refreshToken, err := pkg.GenerateToken(
+			123,
+			7*24*time.Hour,
+		)
+
+		if err != nil {
+			t.Fatalf("failed to create test token: %v", err)
+		}
+
+		err = u.Logout(
+			context.Background(),
+			refreshToken,
+		)
+
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("invalid_token", func(t *testing.T) {
+		u := auth.NewAuthUsecase(nil, sessionRepoMock{})
+
+		err := u.Logout(
+			context.Background(),
+			"this-is-not-a-jwt",
+		)
+
+		if err == nil {
+			t.Fatal("expected error")
+		}
+	})
+
+	t.Run("expired_token", func(t *testing.T) {
+		u := auth.NewAuthUsecase(nil, sessionRepoMock{})
+
+		expiredToken, err := pkg.GenerateToken(
+			123,
+			-time.Minute,
+		)
+
+		if err != nil {
+			t.Fatalf("failed to create token: %v", err)
+		}
+
+		err = u.Logout(
 			context.Background(),
 			expiredToken,
 		)

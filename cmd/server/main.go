@@ -13,6 +13,7 @@ import (
 	"github.com/NewHorizonIT/logstorm/internal/infra/clickhouse"
 	"github.com/NewHorizonIT/logstorm/internal/infra/kafka"
 	"github.com/NewHorizonIT/logstorm/internal/infra/postgres"
+	"github.com/NewHorizonIT/logstorm/internal/infra/redis"
 	"github.com/NewHorizonIT/logstorm/internal/observability"
 	"github.com/NewHorizonIT/logstorm/internal/services/auth"
 	"github.com/NewHorizonIT/logstorm/internal/services/ingestion"
@@ -74,12 +75,24 @@ func main() {
 
 	slog.Info("[POSTGES]::Connected")
 
+	// Initialize redis
+	redisClient := redis.NewClient(cfg.Redis)
+	defer redisClient.Close()
+
+	slog.Info("[REDIS]::Connected")
+
+	// Create redis cache
+	redisCache := redis.NewRedisCache(redisClient)
+
+	slog.Info("[REDIS CACHE]::Initialized")
+
 	// Auth service
 	if err := db.AutoMigrate(&auth.Account{}); err != nil {
 		panic(err)
 	}
 	authRepo := auth.NewAuthRepository(db)
-	authUsecase := auth.NewAuthUsecase(authRepo)
+	sessionRepo := auth.NewSessionRepository(redisCache)
+	authUsecase := auth.NewAuthUsecase(authRepo, sessionRepo)
 	authHandler := auth.NewAuthHandler(authUsecase)
 	authRouter := auth.NewAuthRouter(authHandler)
 
