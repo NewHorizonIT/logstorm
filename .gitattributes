@@ -1,0 +1,40 @@
+* text=auto eol=lf
+
+# Go
+*.go text
+
+# TypeScript
+*.ts text
+*.tsx text
+*.js text
+*.jsx text
+*.mjs text
+*.cjs text
+
+# Shell
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Config
+*.json text
+*.yaml text
+*.yml text
+*.toml text
+*.env text
+*.md text
+
+# Windows scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
