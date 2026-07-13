@@ -4,3 +4,5 @@ docs/
 .vscode/
 *.log
 deploy/env/*
+bin
+config.yaml
