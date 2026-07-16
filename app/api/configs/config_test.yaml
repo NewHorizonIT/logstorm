@@ -41,7 +41,20 @@ clickhouse:
 logging:
   level: debug
   format: console
-  output: stdout
+  output: both
+  environment: development
+
+  console_enabled: true
+
+  file_enabled: true
+  file_path: logs/app.log
+
+  rotation_enabled: true
+  rotation_max_size: 100
+  rotation_max_age: 30
+  rotation_max_backups: 7
+
+  compression_enabled: true
 
 auth:
   jwt_secret: "12345678901234567890123456789012"

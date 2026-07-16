@@ -1,9 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"github.com/logstorm/api/internal/bootstrap"
 )
 
 func main() {
-	fmt.Println("Hello, World!")
+	app, err := bootstrap.NewApp()
+	if err != nil {
+		panic(err)
+	}
+
+	defer app.Logger.Close()
+
 }

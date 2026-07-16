@@ -51,9 +51,22 @@ type ClickHouseConfig struct {
 }
 
 type LoggingConfig struct {
-	Level  string `mapstructure:"level" validate:"required,oneof=debug info warn error fatal panic"`
-	Format string `mapstructure:"format" validate:"required,oneof=json console"`
-	Output string `mapstructure:"output" validate:"required"`
+	Level          string `mapstructure:"level" validate:"required,oneof=debug info warn error fatal panic"`
+	Format         string `mapstructure:"format" validate:"required,oneof=json console"`
+	Output         string `mapstructure:"output" validate:"required"`
+	Environment    string `mapstructure:"environment" validate:"required,oneof=development staging production test"`
+	ConsoleEnabled bool   `mapstructure:"console_enabled"`
+
+	// File logging configuration
+	FilePath    string `mapstructure:"file_path" validate:"required_if=Output file"`
+	FileEnabled bool   `mapstructure:"file_enabled"`
+
+	// Rotation configuration
+	RotationEnabled    bool `mapstructure:"rotation_enabled"`
+	RotationMaxSize    int  `mapstructure:"rotation_max_size" validate:"required_if=RotationEnabled true,gte=1"`
+	RotationMaxAge     int  `mapstructure:"rotation_max_age" validate:"required_if=RotationEnabled true,gte=1"`
+	RotationMaxBackups int  `mapstructure:"rotation_max_backups" validate:"required_if=RotationEnabled true,gte=0"`
+	CompressionEnabled bool `mapstructure:"compression_enabled"`
 }
 
 type AuthConfig struct {
