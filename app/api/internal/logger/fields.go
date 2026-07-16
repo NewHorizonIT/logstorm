@@ -15,4 +15,6 @@ const (
 
 	FieldComponent = "component"
 	FieldOperation = "operation"
+	FieldRecovered = "panic_recovered"
+	FieldStack     = "stack"
 )
