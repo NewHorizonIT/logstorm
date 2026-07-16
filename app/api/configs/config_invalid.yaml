@@ -1,0 +1,42 @@
+app:
+  name: LogStorm
+  environment: production
+
+server:
+  protocol: ftp
+  host: localhost
+  port: 99999
+  base_path: api
+
+database:
+  driver: postgres
+  host: ""
+  port: 5432
+  username: postgres
+  password: postgres
+  name: logstorm
+
+  max_open_conns: 5
+  max_idle_conns: 10
+
+clickhouse:
+  host: localhost
+  http_port: 8123
+  native_port: 9000
+  username: default
+  database: logstorm
+
+logging:
+  level: abc
+  format: yaml
+  output: stdout
+
+auth:
+  jwt_secret: short
+  access_token_ttl: 24h
+  refresh_token_ttl: 15m
+
+cors:
+  allowed_origins: []
+  allowed_methods: []
+  allowed_headers: []

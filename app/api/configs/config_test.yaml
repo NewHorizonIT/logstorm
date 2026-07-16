@@ -1,0 +1,78 @@
+# ==============================================================================
+# LogStorm Test Configuration
+# ==============================================================================
+
+app:
+  name: LogStorm
+  environment: test
+  version: "0.1.0"
+
+server:
+  protocol: http
+  host: localhost
+  port: 8080
+  base_path: /api/v1
+
+database:
+  driver: postgres
+  host: localhost
+  port: 5432
+  username: postgres
+  password: postgres
+  name: logstorm_test
+
+  tls_enabled: false
+
+  max_open_conns: 10
+  max_idle_conns: 5
+  conn_max_lifetime: 30m
+
+clickhouse:
+  host: localhost
+  http_port: 8123
+  native_port: 9000
+  username: default
+  password: ""
+  database: logstorm_test
+
+  secure: false
+  compression: false
+
+logging:
+  level: debug
+  format: console
+  output: both
+  environment: development
+
+  console_enabled: true
+
+  file_enabled: true
+  file_path: logs/app.log
+
+  rotation_enabled: true
+  rotation_max_size: 100
+  rotation_max_age: 30
+  rotation_max_backups: 7
+
+  compression_enabled: true
+
+auth:
+  jwt_secret: "12345678901234567890123456789012"
+
+  access_token_ttl: 15m
+  refresh_token_ttl: 168h
+
+cors:
+  allowed_origins:
+    - "*"
+
+  allowed_methods:
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+
+  allowed_headers:
+    - Authorization
+    - Content-Type
