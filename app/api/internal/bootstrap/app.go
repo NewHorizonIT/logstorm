@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/logstorm/api/internal/config"
 	"github.com/logstorm/api/internal/logger"
 )
@@ -8,6 +9,7 @@ import (
 type App struct {
 	Logger *logger.Logger
 	Config *config.Config
+	Router *gin.Engine
 }
 
 func NewApp() (*App, error) {
@@ -24,8 +26,12 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
+	// Setup router and middleware
+	router := SetupRouter(cfg, *root.Zerolog)
+
 	return &App{
 		Logger: root,
 		Config: cfg,
+		Router: router,
 	}, nil
 }
