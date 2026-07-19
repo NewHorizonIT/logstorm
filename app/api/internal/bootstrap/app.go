@@ -14,7 +14,7 @@ type App struct {
 
 func NewApp() (*App, error) {
 	cfg, err := config.Load(config.LoaderOptions{
-		ConfigFile: "../../configs/config.yaml",
+		ConfigFile: "configs/config.yaml",
 	})
 	if err != nil {
 		return nil, err
@@ -34,4 +34,12 @@ func NewApp() (*App, error) {
 		Config: cfg,
 		Router: router,
 	}, nil
+}
+
+func CloseApp(app *App) error {
+	if err := app.Logger.Close(); err != nil {
+		return err
+	}
+
+	return nil
 }

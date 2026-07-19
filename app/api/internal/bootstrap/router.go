@@ -5,6 +5,7 @@ import (
 	"github.com/logstorm/api/internal/config"
 	"github.com/logstorm/api/internal/logger"
 	"github.com/logstorm/api/internal/middleware"
+	"github.com/logstorm/api/internal/modules/health"
 	"github.com/rs/zerolog"
 )
 
@@ -14,11 +15,16 @@ func SetupRouter(
 ) *gin.Engine {
 	router := gin.New()
 
-	router.Use(
-		logger.RequestLogger(appLogger),
+	api := router.Group(cfg.Server.BasePath)
+
+	api.Use(
 		middleware.Recovery(appLogger),
+		logger.RequestLogger(appLogger),
 		middleware.CORS(cfg.CORS),
 	)
+
+	// Add your routes here
+	health.RegisterRoutes(api)
 
 	return router
 }
