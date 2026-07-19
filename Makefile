@@ -1,3 +1,4 @@
+include .env
 .PHONY: up down restart build run test
 
 up:
@@ -23,3 +24,36 @@ run: build
 test:
 	@echo "Running tests..."
 	cd app/api && go test ./... -v
+
+# Migrations related targets
+migrate-up:
+	@echo "Running migrations up..."
+	migrate \
+	-path $(MIGRATION_DIR) \
+	-database "$(DB_URL)" \
+	up
+
+
+migrate-down:
+	@echo "Running migrations down..."
+	migrate \
+	-path $(MIGRATION_DIR) \
+	-database "$(DB_URL)" \
+	down 
+
+
+migrate-create:
+	@echo "Creating a new migration..."
+	migrate create \
+	-ext sql \
+	-dir $(MIGRATION_DIR) \
+	-seq \
+	$(name)
+
+
+migrate-version:
+	@echo "Getting the current migration version..."
+	migrate \
+	-path $(MIGRATION_DIR) \
+	-database "$(DB_URL)" \
+	version
