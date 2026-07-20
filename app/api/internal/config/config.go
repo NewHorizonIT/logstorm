@@ -27,16 +27,18 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Driver          string        `mapstructure:"driver" validate:"required,oneof=postgres mysql sqlite"`
-	Host            string        `mapstructure:"host" validate:"required"`
-	Port            int           `mapstructure:"port" validate:"required,min=1,max=65535"`
-	Username        string        `mapstructure:"username" validate:"required"`
-	Password        string        `mapstructure:"password"`
-	Name            string        `mapstructure:"name" validate:"required"`
-	TLSEnabled      bool          `mapstructure:"tls_enabled"`
-	MaxOpenConns    int           `mapstructure:"max_open_conns" validate:"gte=1"`
-	MaxIdleConns    int           `mapstructure:"max_idle_conns" validate:"gte=0"`
-	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime" validate:"gte=0"`
+	Driver            string        `mapstructure:"driver" validate:"required,oneof=postgres mysql sqlite"`
+	Host              string        `mapstructure:"host" validate:"required"`
+	Port              int           `mapstructure:"port" validate:"required,min=1,max=65535"`
+	Username          string        `mapstructure:"username" validate:"required"`
+	Password          string        `mapstructure:"password"`
+	Name              string        `mapstructure:"name" validate:"required"`
+	TLSEnabled        bool          `mapstructure:"tls_enabled"`
+	MaxOpenConns      int           `mapstructure:"max_open_conns" validate:"gte=1"`
+	MaxIdleConns      int           `mapstructure:"max_idle_conns" validate:"gte=0"`
+	ConnMaxLifetime   time.Duration `mapstructure:"conn_max_lifetime" validate:"gte=0"`
+	MaxConnIdleTime   time.Duration `mapstructure:"max_conn_idle_time" validate:"gte=0"`
+	HealthCheckPeriod time.Duration `mapstructure:"health_check_period" validate:"gte=0"`
 }
 
 type ClickHouseConfig struct {
