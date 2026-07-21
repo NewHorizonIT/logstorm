@@ -42,6 +42,7 @@ type DatabaseConfig struct {
 }
 
 type ClickHouseConfig struct {
+	Protocol    string `mapstructure:"protocol" validate:"required,oneof=native http"`
 	Host        string `mapstructure:"host" validate:"required"`
 	HTTPPort    int    `mapstructure:"http_port" validate:"required,min=1,max=65535"`
 	NativePort  int    `mapstructure:"native_port" validate:"required,min=1,max=65535"`
@@ -50,6 +51,10 @@ type ClickHouseConfig struct {
 	Database    string `mapstructure:"database" validate:"required"`
 	Secure      bool   `mapstructure:"secure"`
 	Compression bool   `mapstructure:"compression"`
+	// Add fields support for connection lifecycles and pooling
+	MaxOpenConns    int           `mapstructure:"max_open_conns" validate:"gte=1"`
+	MaxIdleConns    int           `mapstructure:"max_idle_conns" validate:"gte=0"`
+	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime" validate:"gte=0"`
 }
 
 type LoggingConfig struct {
