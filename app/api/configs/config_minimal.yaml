@@ -14,11 +14,15 @@ database:
   health_check_period: 1m
 
 clickhouse:
+  protocol: http
   host: localhost
   http_port: 8123
   native_port: 9000
   username: default
   database: logstorm
+  max_open_conns: 10
+  max_idle_conns: 5
+  conn_max_lifetime: 30m
 
 logging:
   level: info

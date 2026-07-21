@@ -8,10 +8,11 @@ import (
 )
 
 type App struct {
-	Logger *logger.Logger
-	Config *config.Config
-	Router *gin.Engine
-	DB     *database.Postgres
+	Logger     *logger.Logger
+	Config     *config.Config
+	Router     *gin.Engine
+	DB         *database.Postgres
+	ClickHouse database.ClickHouseClient
 }
 
 func NewApp() (*App, error) {
@@ -38,23 +39,47 @@ func NewApp() (*App, error) {
 	if err := postgres.Ping(); err != nil {
 		return nil, err
 	}
+
+	// Connect to ClickHouse
+	clickhouse, err := database.NewClickHouse(cfg.ClickHouse)
+	if err != nil {
+		return nil, err
+	}
+
+	// Ping ClickHouse to ensure the connection is valid
+	if err := clickhouse.Ping(); err != nil {
+		clickhouse.Close()
+		return nil, err
+	}
+
+	// Health check for ClickHouse
+	if err := clickhouse.HealthCheck(); err != nil {
+		clickhouse.Close()
+		return nil, err
+	}
+
 	// Setup router and middleware
 	router := SetupRouter(cfg, *root.Zerolog)
 
 	return &App{
-		Logger: root,
-		Config: cfg,
-		Router: router,
-		DB:     postgres,
+		Logger:     root,
+		Config:     cfg,
+		Router:     router,
+		DB:         postgres,
+		ClickHouse: clickhouse,
 	}, nil
 }
 
 func CloseApp(app *App) error {
-	if err := app.Logger.Close(); err != nil {
+	app.DB.Close()
+
+	if err := app.ClickHouse.Close(); err != nil {
 		return err
 	}
 
-	app.DB.Close()
+	if err := app.Logger.Close(); err != nil {
+		return err
+	}
 
 	return nil
 }
