@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net"
 	"net/http"
@@ -30,8 +31,8 @@ func main() {
 
 	// Goroutine to start the server
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("server error: %v", err)
 		}
 	}()
 
@@ -49,11 +50,11 @@ func main() {
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("server shutdown: %s\n", err)
+		log.Printf("shutdown error: %v", err)
 	}
 
 	// App Close
 	if err := bootstrap.CloseApp(app); err != nil {
-		log.Fatalf("failed to close app: %s\n", err)
+		log.Printf("close app error: %v", err)
 	}
 }

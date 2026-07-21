@@ -11,10 +11,9 @@ func RegisterRoutes(router *gin.RouterGroup) {
 		c.JSON(
 			http.StatusOK,
 			gin.H{
-				"status":    "ok",
-				"service":   "LogStorm API",
-				"version":   "1.0.0",
-				"timestamp": c.MustGet("request_start_time"),
+				"status":  "ok",
+				"service": "LogStorm API",
+				"version": "1.0.0",
 			},
 		)
 	})
