@@ -8,12 +8,13 @@ LogStorm is a developer-first observability platform that enables engineering te
 
 ## Tech Stack
 
-- Go 
+- Go
 - Typescript
 - Docker
 - ReactJS
 
 ---
+
 ## Project Structure
 
 ```
@@ -38,7 +39,7 @@ LogStorm is a developer-first observability platform that enables engineering te
 - Node.js >= 22
 - pnpm >= 10
 
---- 
+---
 
 ## Installation
 
@@ -53,5 +54,3 @@ cd logstorm
 ## Enviroment
 
 ## Make command
-
-
