@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "typecheck": "tsc --noEmit"
+    "typecheck:web": "npm --prefix app/web run typecheck"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
