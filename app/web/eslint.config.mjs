@@ -19,7 +19,16 @@ export default defineConfig([
 
   ...tseslint.configs.recommendedTypeChecked,
 
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    "eslint.config.mjs",
+    "postcss.config.mjs",
+    "tailwind.config.mjs",
+    "tsconfig.json",
+  ]),
 
   {
     rules: {
