@@ -1,5 +1,5 @@
 include .env
-.PHONY: up down restart build run test
+.PHONY: up down restart build run test sqlc
 
 up:
 	docker-compose up -d
@@ -12,6 +12,10 @@ restart:
 	docker-compose up -d
 
 # Go related targets
+sqlc:
+	@echo "Generating sqlc code..."
+	cd app/api && sqlc generate
+
 build:
 	@echo "Building the Go application..."
 	cd app/api && go build -o bin/logstorm ./cmd/server

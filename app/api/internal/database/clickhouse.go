@@ -92,7 +92,7 @@ func (ch *ClickHouse) HealthCheck() error {
 	}
 
 	// Select 1
-	var result int
+	var result uint8
 	ctx, cancle := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancle()
 

@@ -7,3 +7,4 @@ deploy/env/*
 bin
 config.yaml
 node_modules/
+.claude/
