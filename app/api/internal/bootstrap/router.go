@@ -6,20 +6,19 @@ import (
 	"github.com/logstorm/api/internal/logger"
 	"github.com/logstorm/api/internal/middleware"
 	"github.com/logstorm/api/internal/modules/health"
-	"github.com/rs/zerolog"
 )
 
 func SetupRouter(
 	cfg *config.Config,
-	appLogger zerolog.Logger,
+	log *logger.Logger,
 ) *gin.Engine {
 	router := gin.New()
 
 	api := router.Group(cfg.Server.BasePath)
 
 	api.Use(
-		middleware.Recovery(appLogger),
-		logger.RequestLogger(appLogger),
+		middleware.Recovery(*log.Zerolog),
+		logger.RequestLogger(*log.Zerolog),
 		middleware.CORS(cfg.CORS),
 	)
 
