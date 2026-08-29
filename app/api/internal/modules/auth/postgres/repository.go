@@ -13,11 +13,12 @@ import (
 )
 
 type PostgresAuthRepository struct {
+	pool    *pgxpool.Pool
 	queries *db.Queries
 }
 
 func NewPostgresAuthRepository(pool *pgxpool.Pool) *PostgresAuthRepository {
-	return &PostgresAuthRepository{queries: db.New(pool)}
+	return &PostgresAuthRepository{pool: pool, queries: db.New(pool)}
 }
 
 func (r *PostgresAuthRepository) CreateRefreshToken(
@@ -51,6 +52,39 @@ func (r *PostgresAuthRepository) GetRefreshTokenByHash(
 
 func (r *PostgresAuthRepository) RevokeRefreshToken(ctx context.Context, tokenHash string) error {
 	return r.queries.RevokeRefreshToken(ctx, tokenHash)
+}
+
+func (r *PostgresAuthRepository) RotateRefreshToken(
+	ctx context.Context,
+	oldHash string,
+	newParams auth.CreateRefreshTokenParams,
+) (*auth.RefreshToken, error) {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	q := db.New(tx)
+
+	if err := q.RevokeRefreshToken(ctx, oldHash); err != nil {
+		return nil, err
+	}
+
+	row, err := q.CreateRefreshToken(ctx, db.CreateRefreshTokenParams{
+		UserID:    pgtype.UUID{Bytes: newParams.UserID, Valid: true},
+		TokenHash: newParams.TokenHash,
+		ExpiresAt: pgtype.Timestamptz{Time: newParams.ExpiresAt, Valid: true},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+
+	return toRefreshToken(row), nil
 }
 
 func (r *PostgresAuthRepository) DeleteExpiredTokens(ctx context.Context) error {

@@ -30,10 +30,11 @@ func (f *fakeUserProvider) GetByEmail(ctx context.Context, email string) (*user.
 }
 
 type fakeAuthRepo struct {
-	createFn    func(ctx context.Context, p auth.CreateRefreshTokenParams) (*auth.RefreshToken, error)
+	createFn   func(ctx context.Context, p auth.CreateRefreshTokenParams) (*auth.RefreshToken, error)
 	getByHashFn func(ctx context.Context, hash string) (*auth.RefreshToken, error)
-	revokeFn    func(ctx context.Context, hash string) error
-	deleteFn    func(ctx context.Context) error
+	revokeFn   func(ctx context.Context, hash string) error
+	rotateFn   func(ctx context.Context, oldHash string, newParams auth.CreateRefreshTokenParams) (*auth.RefreshToken, error)
+	deleteFn   func(ctx context.Context) error
 }
 
 func (f *fakeAuthRepo) CreateRefreshToken(ctx context.Context, p auth.CreateRefreshTokenParams) (*auth.RefreshToken, error) {
@@ -46,6 +47,10 @@ func (f *fakeAuthRepo) GetRefreshTokenByHash(ctx context.Context, hash string) (
 
 func (f *fakeAuthRepo) RevokeRefreshToken(ctx context.Context, hash string) error {
 	return f.revokeFn(ctx, hash)
+}
+
+func (f *fakeAuthRepo) RotateRefreshToken(ctx context.Context, oldHash string, newParams auth.CreateRefreshTokenParams) (*auth.RefreshToken, error) {
+	return f.rotateFn(ctx, oldHash, newParams)
 }
 
 func (f *fakeAuthRepo) DeleteExpiredTokens(ctx context.Context) error {
@@ -217,8 +222,7 @@ func TestAuthService_Refresh_Success(t *testing.T) {
 	authRepo.getByHashFn = func(_ context.Context, _ string) (*auth.RefreshToken, error) {
 		return &auth.RefreshToken{ID: uuid.New(), UserID: userID}, nil
 	}
-	authRepo.revokeFn = func(_ context.Context, _ string) error { return nil }
-	authRepo.createFn = func(_ context.Context, _ auth.CreateRefreshTokenParams) (*auth.RefreshToken, error) {
+	authRepo.rotateFn = func(_ context.Context, _ string, _ auth.CreateRefreshTokenParams) (*auth.RefreshToken, error) {
 		return &auth.RefreshToken{ID: uuid.New(), UserID: userID}, nil
 	}
 

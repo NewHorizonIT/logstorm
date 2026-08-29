@@ -189,6 +189,41 @@ func TestRevokeRefreshToken(t *testing.T) {
 	assert.ErrorIs(t, err, auth.ErrRefreshTokenNotFound)
 }
 
+func TestRotateRefreshToken(t *testing.T) {
+	t.Parallel()
+
+	u := createTestUser(t)
+	repo := newRepo()
+	ctx := context.Background()
+
+	oldHash := tokenHash("old-token")
+	_, err := repo.CreateRefreshToken(ctx, auth.CreateRefreshTokenParams{
+		UserID:    u.ID,
+		TokenHash: oldHash,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	})
+	require.NoError(t, err)
+
+	newHash := tokenHash("new-token")
+	newToken, err := repo.RotateRefreshToken(ctx, oldHash, auth.CreateRefreshTokenParams{
+		UserID:    u.ID,
+		TokenHash: newHash,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	})
+
+	require.NoError(t, err)
+	assert.Equal(t, newHash, newToken.TokenHash)
+
+	// Old token phải bị revoke
+	_, err = repo.GetRefreshTokenByHash(ctx, oldHash)
+	assert.ErrorIs(t, err, auth.ErrRefreshTokenNotFound)
+
+	// New token phải accessible
+	found, err := repo.GetRefreshTokenByHash(ctx, newHash)
+	require.NoError(t, err)
+	assert.Equal(t, newHash, found.TokenHash)
+}
+
 func TestDeleteExpiredTokens(t *testing.T) {
 	t.Parallel()
 

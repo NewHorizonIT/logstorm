@@ -74,14 +74,32 @@ func (s *AuthService) Refresh(ctx context.Context, rawRefreshToken string) (acce
 	hashed := hashToken(rawRefreshToken)
 	existing, err := s.authRepo.GetRefreshTokenByHash(ctx, hashed)
 	if err != nil {
-		return "", "", ErrRefreshTokenNotFound
-	}
-
-	if err := s.authRepo.RevokeRefreshToken(ctx, hashed); err != nil {
+		if errors.Is(err, ErrRefreshTokenNotFound) {
+			return "", "", ErrRefreshTokenNotFound
+		}
 		return "", "", err
 	}
 
-	return s.issueTokenPair(ctx, existing.UserID)
+	accessToken, err = s.tokenSvc.GenerateAccessToken(existing.UserID)
+	if err != nil {
+		return "", "", err
+	}
+
+	var hashedRefresh string
+	newRawRefreshToken, hashedRefresh, err = s.tokenSvc.GenerateRefreshToken()
+	if err != nil {
+		return "", "", err
+	}
+
+	if _, err = s.authRepo.RotateRefreshToken(ctx, hashed, CreateRefreshTokenParams{
+		UserID:    existing.UserID,
+		TokenHash: hashedRefresh,
+		ExpiresAt: time.Now().Add(s.tokenSvc.RefreshTokenTTL()),
+	}); err != nil {
+		return "", "", err
+	}
+
+	return accessToken, newRawRefreshToken, nil
 }
 
 func (s *AuthService) issueTokenPair(ctx context.Context, userID uuid.UUID) (accessToken, rawRefreshToken string, err error) {
