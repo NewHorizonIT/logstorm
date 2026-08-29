@@ -14,8 +14,3 @@ type RefreshToken struct {
 	RevokedAt *time.Time
 	CreatedAt time.Time
 }
-
-type TokenPair struct {
-	AccessToken  string
-	RefreshToken string
-}
