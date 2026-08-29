@@ -166,6 +166,39 @@ func TestCreateUser_FullNameTooLong(t *testing.T) {
 	assert.ErrorIs(t, err, ErrValidation)
 }
 
+func TestGetByEmail_Delegates(t *testing.T) {
+	t.Parallel()
+
+	want := fixedUser("found@example.com", "Found User")
+	repo := &fakeUserRepository{
+		getByEmailFn: func(_ context.Context, _ string) (*User, error) {
+			return want, nil
+		},
+	}
+	svc := NewUserService(repo)
+
+	got, err := svc.GetByEmail(context.Background(), "found@example.com")
+
+	require.NoError(t, err)
+	assert.Equal(t, want.ID, got.ID)
+	assert.Equal(t, want.Email, got.Email)
+}
+
+func TestGetByEmail_NotFound(t *testing.T) {
+	t.Parallel()
+
+	repo := &fakeUserRepository{
+		getByEmailFn: func(_ context.Context, _ string) (*User, error) {
+			return nil, ErrUserNotFound
+		},
+	}
+	svc := NewUserService(repo)
+
+	_, err := svc.GetByEmail(context.Background(), "nobody@example.com")
+
+	assert.ErrorIs(t, err, ErrUserNotFound)
+}
+
 func TestCreateUser_FullNameAtMaxLength(t *testing.T) {
 	t.Parallel()
 
