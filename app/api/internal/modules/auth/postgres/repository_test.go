@@ -106,7 +106,9 @@ func createTestUser(t *testing.T) *user.User {
 	})
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		testPool.Exec(context.Background(), "DELETE FROM users WHERE id = $1", u.ID)
+		if _, err := testPool.Exec(context.Background(), "DELETE FROM users WHERE id = $1", u.ID); err != nil {
+			t.Logf("cleanup: failed to delete test user %s: %v", u.ID, err)
+		}
 	})
 	return u
 }
@@ -231,17 +233,29 @@ func TestDeleteExpiredTokens(t *testing.T) {
 	repo := newRepo()
 	ctx := context.Background()
 
-	hash := tokenHash("already-expired")
+	expiredHash := tokenHash("already-expired")
 	_, err := repo.CreateRefreshToken(ctx, auth.CreateRefreshTokenParams{
 		UserID:    u.ID,
-		TokenHash: hash,
+		TokenHash: expiredHash,
 		ExpiresAt: time.Now().Add(-1 * time.Hour),
+	})
+	require.NoError(t, err)
+
+	validHash := tokenHash("still-valid")
+	_, err = repo.CreateRefreshToken(ctx, auth.CreateRefreshTokenParams{
+		UserID:    u.ID,
+		TokenHash: validHash,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
 	})
 	require.NoError(t, err)
 
 	err = repo.DeleteExpiredTokens(ctx)
 	require.NoError(t, err)
 
-	_, err = repo.GetRefreshTokenByHash(ctx, hash)
+	_, err = repo.GetRefreshTokenByHash(ctx, expiredHash)
 	assert.ErrorIs(t, err, auth.ErrRefreshTokenNotFound)
+
+	found, err := repo.GetRefreshTokenByHash(ctx, validHash)
+	require.NoError(t, err)
+	assert.Equal(t, validHash, found.TokenHash)
 }

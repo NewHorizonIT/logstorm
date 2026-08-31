@@ -80,6 +80,10 @@ func (s *AuthService) Refresh(ctx context.Context, rawRefreshToken string) (acce
 		return "", "", err
 	}
 
+	if time.Now().After(existing.ExpiresAt) {
+		return "", "", ErrTokenExpired
+	}
+
 	accessToken, err = s.tokenSvc.GenerateAccessToken(existing.UserID)
 	if err != nil {
 		return "", "", err

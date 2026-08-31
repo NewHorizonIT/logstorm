@@ -60,6 +60,27 @@ func TestTokenService_ValidateAccessToken_InvalidSignature(t *testing.T) {
 	assert.ErrorIs(t, err, auth.ErrTokenInvalid)
 }
 
+func TestTokenService_ValidateAccessToken_WrongKey(t *testing.T) {
+	t.Parallel()
+
+	signer := auth.NewTokenService(config.AuthConfig{
+		JWTSecret:       "signer-secret-key-minimum-32-chars!",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+	})
+	validator := auth.NewTokenService(config.AuthConfig{
+		JWTSecret:       "validator-secret-key-minimum-32-aa!",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+	})
+
+	token, err := signer.GenerateAccessToken(uuid.New())
+	require.NoError(t, err)
+
+	_, err = validator.ValidateAccessToken(token)
+	assert.ErrorIs(t, err, auth.ErrTokenInvalid)
+}
+
 func TestTokenService_GenerateRefreshToken_Unique(t *testing.T) {
 	t.Parallel()
 

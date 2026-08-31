@@ -220,7 +220,11 @@ func TestAuthService_Refresh_Success(t *testing.T) {
 	userID := uuid.New()
 
 	authRepo.getByHashFn = func(_ context.Context, _ string) (*auth.RefreshToken, error) {
-		return &auth.RefreshToken{ID: uuid.New(), UserID: userID}, nil
+		return &auth.RefreshToken{
+			ID:        uuid.New(),
+			UserID:    userID,
+			ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+		}, nil
 	}
 	authRepo.rotateFn = func(_ context.Context, _ string, _ auth.CreateRefreshTokenParams) (*auth.RefreshToken, error) {
 		return &auth.RefreshToken{ID: uuid.New(), UserID: userID}, nil
@@ -229,8 +233,35 @@ func TestAuthService_Refresh_Success(t *testing.T) {
 	accessToken, newRawRefresh, err := svc.Refresh(ctx, "old-raw-token")
 
 	require.NoError(t, err)
-	assert.NotEmpty(t, accessToken)
 	assert.NotEmpty(t, newRawRefresh)
+
+	tokenSvc := auth.NewTokenService(config.AuthConfig{
+		JWTSecret:       "test-secret-key-minimum-32-chars!!",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+	})
+	claims, err := tokenSvc.ValidateAccessToken(accessToken)
+	require.NoError(t, err)
+	assert.Equal(t, userID, claims.UserID)
+}
+
+func TestAuthService_Refresh_ExpiredToken(t *testing.T) {
+	t.Parallel()
+
+	svc, _, authRepo := setupService(t)
+	ctx := context.Background()
+
+	authRepo.getByHashFn = func(_ context.Context, _ string) (*auth.RefreshToken, error) {
+		return &auth.RefreshToken{
+			ID:        uuid.New(),
+			UserID:    uuid.New(),
+			ExpiresAt: time.Now().Add(-1 * time.Hour),
+		}, nil
+	}
+
+	_, _, err := svc.Refresh(ctx, "expired-token")
+
+	assert.ErrorIs(t, err, auth.ErrTokenExpired)
 }
 
 func TestAuthService_Refresh_InvalidToken(t *testing.T) {

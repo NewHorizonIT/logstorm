@@ -24,6 +24,9 @@ type TokenService struct {
 }
 
 func NewTokenService(cfg config.AuthConfig) *TokenService {
+	if len(cfg.JWTSecret) < 32 {
+		panic("auth: jwt_secret must be at least 32 characters")
+	}
 	return &TokenService{
 		secretKey:       []byte(cfg.JWTSecret),
 		accessTokenTTL:  cfg.AccessTokenTTL,

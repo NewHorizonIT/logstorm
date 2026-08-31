@@ -7,6 +7,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/logstorm/api/internal/config"
+	"github.com/logstorm/api/internal/logger"
 )
 
 var Module = fx.Module("auth",
@@ -22,7 +23,7 @@ func provideAuthConfig(cfg *config.Config) config.AuthConfig {
 	return cfg.Auth
 }
 
-func startCleanupGoroutine(lc fx.Lifecycle, repo AuthRepository) {
+func startCleanupGoroutine(lc fx.Lifecycle, repo AuthRepository, log *logger.Logger) {
 	var cancel context.CancelFunc
 
 	lc.Append(fx.Hook{
@@ -35,7 +36,9 @@ func startCleanupGoroutine(lc fx.Lifecycle, repo AuthRepository) {
 				for {
 					select {
 					case <-ticker.C:
-						_ = repo.DeleteExpiredTokens(context.Background())
+						if err := repo.DeleteExpiredTokens(context.Background()); err != nil {
+							log.Zerolog.Error().Err(err).Msg("auth: failed to delete expired refresh tokens")
+						}
 					case <-ctx.Done():
 						return
 					}
