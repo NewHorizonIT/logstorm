@@ -47,3 +47,7 @@ func (s *UserService) CreateUser(ctx context.Context, input CreateUserInput) (*U
 		FullName:     input.FullName,
 	})
 }
+
+func (s *UserService) GetByEmail(ctx context.Context, email string) (*User, error) {
+	return s.repo.GetByEmail(ctx, strings.TrimSpace(email))
+}
