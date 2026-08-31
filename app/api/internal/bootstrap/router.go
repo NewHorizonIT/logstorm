@@ -5,12 +5,14 @@ import (
 	"github.com/logstorm/api/internal/config"
 	"github.com/logstorm/api/internal/logger"
 	"github.com/logstorm/api/internal/middleware"
+	"github.com/logstorm/api/internal/modules/auth"
 	"github.com/logstorm/api/internal/modules/health"
 )
 
 func SetupRouter(
 	cfg *config.Config,
 	log *logger.Logger,
+	authHandler *auth.AuthHandler,
 ) *gin.Engine {
 	router := gin.New()
 
@@ -22,8 +24,8 @@ func SetupRouter(
 		middleware.CORS(cfg.CORS),
 	)
 
-	// Add your routes here
 	health.RegisterRoutes(api)
+	auth.RegisterRoutes(api, authHandler)
 
 	return router
 }

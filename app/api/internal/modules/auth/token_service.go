@@ -78,3 +78,7 @@ func (s *TokenService) GenerateRefreshToken() (rawToken, hashedToken string, err
 func (s *TokenService) RefreshTokenTTL() time.Duration {
 	return s.refreshTokenTTL
 }
+
+func (s *TokenService) AccessTokenTTL() time.Duration {
+	return s.accessTokenTTL
+}
