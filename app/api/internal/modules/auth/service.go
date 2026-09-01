@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"github.com/logstorm/api/internal/modules/user"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterInput struct {
@@ -133,3 +133,4 @@ func hashToken(raw string) string {
 	sum := sha256.Sum256([]byte(raw))
 	return hex.EncodeToString(sum[:])
 }
+

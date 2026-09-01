@@ -8,12 +8,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/fx"
 
 	"github.com/logstorm/api/internal/config"
 	"github.com/logstorm/api/internal/database"
 	"github.com/logstorm/api/internal/logger"
+	"github.com/logstorm/api/internal/modules/auth"
+	"github.com/logstorm/api/internal/modules/user"
 )
 
 var Module = fx.Module("bootstrap",
@@ -27,6 +30,7 @@ var Module = fx.Module("bootstrap",
 		providePostgres,
 		provideClickHouse,
 		providePgPool,
+		provideUserProvider,
 		SetupRouter,
 	),
 	fx.Invoke(startServer),
@@ -44,6 +48,11 @@ func provideDatabaseConfig(cfg *config.Config) config.DatabaseConfig {
 
 func provideClickHouseConfig(cfg *config.Config) config.ClickHouseConfig {
 	return cfg.ClickHouse
+}
+
+// -- Domain providers -------------------------------------------------------
+func provideUserProvider(userService *user.UserService) auth.UserProvider {
+    return userService
 }
 
 // -- Infrastructure providers with lifecycle ---------------------------------
@@ -105,7 +114,7 @@ func providePgPool(pg *database.Postgres) *pgxpool.Pool {
 
 // -- HTTP server lifecycle ----------------------------------------------------
 
-func startServer(lc fx.Lifecycle, cfg *config.Config, log *logger.Logger, router http.Handler) {
+func startServer(lc fx.Lifecycle, cfg *config.Config, log *logger.Logger, router *gin.Engine) {
 	addr := net.JoinHostPort(cfg.Server.Host, strconv.Itoa(cfg.Server.Port))
 	srv := &http.Server{Addr: addr, Handler: router}
 

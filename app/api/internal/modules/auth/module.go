@@ -15,6 +15,8 @@ var Module = fx.Module("auth",
 		provideAuthConfig,
 		NewTokenService,
 		NewAuthService,
+		NewAuthHandler,
+		NewMiddleware,
 	),
 	fx.Invoke(startCleanupGoroutine),
 )
