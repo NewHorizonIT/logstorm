@@ -7,12 +7,15 @@ import (
 	"github.com/logstorm/api/internal/middleware"
 	"github.com/logstorm/api/internal/modules/auth"
 	"github.com/logstorm/api/internal/modules/health"
+	"github.com/logstorm/api/internal/modules/project"
 )
 
 func SetupRouter(
 	cfg *config.Config,
 	log *logger.Logger,
 	authHandler *auth.AuthHandler,
+	authMiddleware auth.Middleware,
+	projectHandler *project.ProjectHandler,
 ) *gin.Engine {
 	router := gin.New()
 
@@ -26,6 +29,9 @@ func SetupRouter(
 
 	health.RegisterRoutes(api)
 	auth.RegisterRoutes(api, authHandler)
+
+	protected := api.Group("", authMiddleware.Authenticate)
+	project.RegisterRoutes(protected, projectHandler)
 
 	return router
 }
