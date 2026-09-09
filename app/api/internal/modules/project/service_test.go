@@ -295,7 +295,39 @@ func TestUpdateProject_NotFound(t *testing.T) {
 	assert.ErrorIs(t, err, project.ErrProjectNotFound)
 }
 
- func TestCreateProject_NameAtMaxLength(t *testing.T) {
+// --- VerifyProjectOwnership ---
+
+func TestVerifyProjectOwnership_Success(t *testing.T) {
+	t.Parallel()
+
+	ownerID := uuid.New()
+	proj := fixedProject(ownerID, "App", "app")
+	repo := &fakeProjectRepo{
+		getByIDFn: func(_ context.Context, id, oID uuid.UUID) (*project.Project, error) {
+			assert.Equal(t, proj.ID, id)
+			assert.Equal(t, ownerID, oID)
+			return proj, nil
+		},
+	}
+
+	err := newSvc(repo).VerifyProjectOwnership(context.Background(), proj.ID, ownerID)
+	require.NoError(t, err)
+}
+
+func TestVerifyProjectOwnership_NotFound(t *testing.T) {
+	t.Parallel()
+
+	repo := &fakeProjectRepo{
+		getByIDFn: func(_ context.Context, _, _ uuid.UUID) (*project.Project, error) {
+			return nil, project.ErrProjectNotFound
+		},
+	}
+
+	err := newSvc(repo).VerifyProjectOwnership(context.Background(), uuid.New(), uuid.New())
+	assert.ErrorIs(t, err, project.ErrProjectNotFound)
+}
+
+func TestCreateProject_NameAtMaxLength(t *testing.T) {
       repo := &fakeProjectRepo{createFn: func(_ context.Context, p project.CreateProjectParams) (*project.Project, error) {
           return fixedProject(uuid.New(), p.Name, p.Slug), nil
       }}

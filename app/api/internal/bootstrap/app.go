@@ -9,13 +9,16 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/fx"
 
 	"github.com/logstorm/api/internal/config"
 	"github.com/logstorm/api/internal/database"
 	"github.com/logstorm/api/internal/logger"
+	"github.com/logstorm/api/internal/modules/apikey"
 	"github.com/logstorm/api/internal/modules/auth"
+	"github.com/logstorm/api/internal/modules/project"
 	"github.com/logstorm/api/internal/modules/user"
 )
 
@@ -51,8 +54,29 @@ func provideClickHouseConfig(cfg *config.Config) config.ClickHouseConfig {
 }
 
 // -- Domain providers -------------------------------------------------------
+
 func provideUserProvider(userService *user.UserService) auth.UserProvider {
-    return userService
+	return userService
+}
+
+// provideProjectVerifier adapts project.ProjectService to apikey.ProjectVerifier,
+// translating project.ErrProjectNotFound → apikey.ErrProjectNotFound at the module boundary.
+func provideProjectVerifier(svc *project.ProjectService) apikey.ProjectVerifier {
+	return &projectVerifierAdapter{svc: svc}
+}
+
+type projectVerifierAdapter struct {
+	svc *project.ProjectService
+}
+
+func (a *projectVerifierAdapter) VerifyProjectOwnership(ctx context.Context, projectID, ownerID uuid.UUID) error {
+	if err := a.svc.VerifyProjectOwnership(ctx, projectID, ownerID); err != nil {
+		if errors.Is(err, project.ErrProjectNotFound) {
+			return apikey.ErrProjectNotFound
+		}
+		return err
+	}
+	return nil
 }
 
 // -- Infrastructure providers with lifecycle ---------------------------------

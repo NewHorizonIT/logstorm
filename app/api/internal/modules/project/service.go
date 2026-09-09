@@ -103,6 +103,11 @@ func (s *ProjectService) UpdateProject(ctx context.Context, ownerID uuid.UUID, i
 	})
 }
 
+func (s *ProjectService) VerifyProjectOwnership(ctx context.Context, projectID, ownerID uuid.UUID) error {
+	_, err := s.repo.GetByID(ctx, projectID, ownerID)
+	return err
+}
+
 func generateSlug(name string) string {
 	var b strings.Builder
 	for _, r := range strings.ToLower(name) {
