@@ -8,6 +8,7 @@ import (
 	apikeypostgres "github.com/logstorm/api/internal/modules/apikey/postgres"
 	"github.com/logstorm/api/internal/modules/auth"
 	authpostgres "github.com/logstorm/api/internal/modules/auth/postgres"
+	"github.com/logstorm/api/internal/modules/ingestion"
 	"github.com/logstorm/api/internal/modules/project"
 	projectpostgres "github.com/logstorm/api/internal/modules/project/postgres"
 	"github.com/logstorm/api/internal/modules/user"
@@ -25,5 +26,6 @@ func main() {
 		projectpostgres.Module,
 		apikey.Module,
 		apikeypostgres.Module,
+		ingestion.Module,
 	).Run()
 }

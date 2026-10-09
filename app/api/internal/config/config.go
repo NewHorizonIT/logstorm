@@ -11,6 +11,7 @@ type Config struct {
 	Logging    LoggingConfig    `mapstructure:"logging" validate:"required"`
 	Auth       AuthConfig       `mapstructure:"auth" validate:"required"`
 	CORS       CORSConfig       `mapstructure:"cors" validate:"required"`
+	Redpanda   RedpandaConfig   `mapstructure:"redpanda" validate:"required"`
 }
 
 type AppConfig struct {
@@ -86,4 +87,11 @@ type CORSConfig struct {
 	AllowedOrigins []string `mapstructure:"allowed_origins" validate:"required,min=1,dive,required"`
 	AllowedMethods []string `mapstructure:"allowed_methods" validate:"required,min=1,dive,required"`
 	AllowedHeaders []string `mapstructure:"allowed_headers" validate:"required,min=1,dive,required"`
+}
+
+type RedpandaConfig struct {
+	Brokers  []string `mapstructure:"brokers" validate:"required,min=1,dive,required"`
+	Topic    string   `mapstructure:"topic" validate:"required"`
+	GroupID  string   `mapstructure:"group_id" validate:"required"`
+	DLQTopic string   `mapstructure:"dlq_topic" validate:"required"`
 }

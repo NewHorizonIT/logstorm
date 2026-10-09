@@ -21,6 +21,11 @@ func Created(c *gin.Context, data any) {
 	c.JSON(http.StatusCreated, gin.H{"data": data})
 }
 
+// Accepted sends 202 with {"data": data}.
+func Accepted(c *gin.Context, data any) {
+	c.JSON(http.StatusAccepted, gin.H{"data": data})
+}
+
 // NoContent sends 204 with no body.
 func NoContent(c *gin.Context) {
 	c.Status(http.StatusNoContent)
@@ -58,6 +63,10 @@ func UnprocessableEntity(c *gin.Context, code, message string) {
 // InternalServerError sends 500 with a generic message — never leak internal details.
 func InternalServerError(c *gin.Context) {
 	Error(c, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR", "internal server error")
+}
+
+func ServiceUnavailable(c *gin.Context, code, message string) {
+	Error(c, http.StatusServiceUnavailable, code, message)
 }
 
 // Abort is like Error but calls AbortWithStatusJSON — use inside middleware.

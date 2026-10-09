@@ -82,3 +82,10 @@ cors:
   allowed_headers:
     - Authorization
     - Content-Type
+
+redpanda:
+  brokers:
+    - localhost:19092
+  topic: logstorm.logs
+  group_id: logstorm.processor
+  dlq_topic: logstorm.logs.dlq
