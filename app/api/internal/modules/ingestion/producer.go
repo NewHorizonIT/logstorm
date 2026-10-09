@@ -1,4 +1,4 @@
-package messaging
+package ingestion
 
 import (
 	"context"
@@ -10,17 +10,16 @@ import (
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kerr"
 	"github.com/twmb/franz-go/pkg/kgo"
-
-	"github.com/logstorm/api/internal/modules/ingestion"
 )
 
 type RedpandaProducer struct {
-	client *kgo.Client
-	topic  string
-	log    zerolog.Logger
+	client   *kgo.Client
+	topic    string
+	dlqTopic string
+	log      zerolog.Logger
 }
 
-func NewRedpandaProducer(brokers []string, topic string, log zerolog.Logger) (*RedpandaProducer, error) {
+func NewRedpandaProducer(brokers []string, topic, dlqTopic string, log zerolog.Logger) (*RedpandaProducer, error) {
 	client, err := kgo.NewClient(
 		kgo.SeedBrokers(brokers...),
 		kgo.RequiredAcks(kgo.LeaderAck()),
@@ -34,10 +33,15 @@ func NewRedpandaProducer(brokers []string, topic string, log zerolog.Logger) (*R
 		return nil, fmt.Errorf("ensure topic %q: %w", topic, err)
 	}
 
-	return &RedpandaProducer{client: client, topic: topic, log: log}, nil
+	if err := ensureTopic(client, dlqTopic); err != nil {
+		client.Close()
+		return nil, fmt.Errorf("ensure dlq topic %q: %w", dlqTopic, err)
+	}
+
+	return &RedpandaProducer{client: client, topic: topic, dlqTopic: dlqTopic, log: log}, nil
 }
 
-func (p *RedpandaProducer) Publish(ctx context.Context, event *ingestion.LogEvent) error {
+func (p *RedpandaProducer) Publish(ctx context.Context, event *LogEvent) error {
 	payload, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("marshal log event: %w", err)
@@ -49,7 +53,9 @@ func (p *RedpandaProducer) Publish(ctx context.Context, event *ingestion.LogEven
 		Value: payload,
 	}
 
-	p.client.Produce(ctx, record, func(r *kgo.Record, err error) {
+	// Use context.Background() — request context may be canceled before
+	// the async callback fires (handler returns 202 before produce completes).
+	p.client.Produce(context.Background(), record, func(r *kgo.Record, err error) {
 		if err != nil {
 			p.log.Error().Err(err).
 				Str("topic", r.Topic).
@@ -61,7 +67,6 @@ func (p *RedpandaProducer) Publish(ctx context.Context, event *ingestion.LogEven
 	return nil
 }
 
-// Close flushes pending records and shuts down the client.
 func (p *RedpandaProducer) Close() {
 	if err := p.client.Flush(context.Background()); err != nil {
 		p.log.Error().Err(err).Msg("redpanda producer flush on close failed")
@@ -69,7 +74,6 @@ func (p *RedpandaProducer) Close() {
 	p.client.Close()
 }
 
-// ensureTopic creates the topic if it does not already exist.
 func ensureTopic(client *kgo.Client, topic string) error {
 	adm := kadm.NewClient(client)
 
@@ -83,6 +87,24 @@ func ensureTopic(client *kgo.Client, topic string) error {
 			return fmt.Errorf("create topic: %w", t.Err)
 		}
 	}
+
+	return nil
+}
+
+func (p *RedpandaProducer) PublishDLQ(_ context.Context, key string, data []byte) error {
+	record := &kgo.Record{
+		Topic: p.dlqTopic,
+		Key:   []byte(key),
+		Value: data,
+	}
+
+	p.client.Produce(context.Background(), record, func(r *kgo.Record, err error) {
+		if err != nil {
+			p.log.Error().Err(err).
+				Str("topic", r.Topic).
+				Msg("failed to publish to DLQ")
+		}
+	})
 
 	return nil
 }

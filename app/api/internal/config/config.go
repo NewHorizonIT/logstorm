@@ -90,6 +90,8 @@ type CORSConfig struct {
 }
 
 type RedpandaConfig struct {
-	Brokers []string `mapstructure:"brokers" validate:"required,min=1,dive,required"`
-	Topic   string   `mapstructure:"topic" validate:"required"`
+	Brokers  []string `mapstructure:"brokers" validate:"required,min=1,dive,required"`
+	Topic    string   `mapstructure:"topic" validate:"required"`
+	GroupID  string   `mapstructure:"group_id" validate:"required"`
+	DLQTopic string   `mapstructure:"dlq_topic" validate:"required"`
 }
