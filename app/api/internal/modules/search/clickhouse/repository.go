@@ -9,15 +9,15 @@ import (
 	"github.com/logstorm/api/internal/modules/search"
 )
 
-type LogRepository struct {
+type ClickHouseLogRepository struct {
 	conn driver.Conn
 }
 
-func NewLogRepository(conn driver.Conn) *LogRepository {
-	return &LogRepository{conn: conn}
+func NewLogRepository(conn driver.Conn) *ClickHouseLogRepository {
+	return &ClickHouseLogRepository{conn: conn}
 }
 
-func (r *LogRepository) Search(ctx context.Context, q search.SearchQuery) (*search.SearchResult, error) {
+func (r *ClickHouseLogRepository) Search(ctx context.Context, q search.SearchQuery) (*search.SearchResult, error) {
 	where, args := buildWhereClause(q)
 
 	// Count total

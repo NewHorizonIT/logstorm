@@ -1,5 +1,7 @@
 package search
 
-type SearchRepository interface {
-	Search(query *SearchQuery) (*SearchResult, error)
+import "context"
+
+type LogRepository interface {
+	Search(ctx context.Context, query *SearchQuery) (*SearchResult, error)
 }
