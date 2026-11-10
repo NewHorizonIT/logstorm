@@ -9,17 +9,17 @@ import (
 )
 
 type LogRecord struct {
-	ID          uuid.UUID         `json:"id"`
-	Timestamp   time.Time         `json:"timestamp"`
-	ProjectID   uuid.UUID         `json:"project_id"`
-	Environment string            `json:"environment"`
-	Level       string            `json:"level"`
-	Service     string            `json:"service"`
-	Message     string            `json:"message"`
-	TraceID     string            `json:"trace_id"`
-	SpanID      string            `json:"span_id"`
-	Source      string            `json:"source"`
-	Attributes  map[string]string `json:"attributes"`
+	ID          uuid.UUID         `ch:"id"          json:"id"`
+	Timestamp   time.Time         `ch:"timestamp"   json:"timestamp"`
+	ProjectID   uuid.UUID         `ch:"project_id"  json:"project_id"`
+	Environment string            `ch:"environment" json:"environment"`
+	Level       string            `ch:"level"       json:"level"`
+	Service     string            `ch:"service"     json:"service"`
+	Message     string            `ch:"message"     json:"message"`
+	TraceID     string            `ch:"trace_id"    json:"trace_id"`
+	SpanID      string            `ch:"span_id"     json:"span_id"`
+	Source      string            `ch:"source"      json:"source"`
+	Attributes  map[string]string `ch:"attributes"  json:"attributes"`
 }
 
 type SearchQuery struct {

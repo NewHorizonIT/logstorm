@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
+	"github.com/logstorm/api/internal/database"
 	"github.com/logstorm/api/internal/modules/search"
 )
 
 type ClickHouseLogRepository struct {
-	conn driver.Conn
+	conn database.ClickHouseClient
 }
 
-func NewLogRepository(conn driver.Conn) *ClickHouseLogRepository {
+func NewLogRepository(conn database.ClickHouseClient) *ClickHouseLogRepository {
 	return &ClickHouseLogRepository{conn: conn}
 }
 
-func (r *ClickHouseLogRepository) Search(ctx context.Context, q search.SearchQuery) (*search.SearchResult, error) {
-	where, args := buildWhereClause(q)
+func (r *ClickHouseLogRepository) Search(ctx context.Context, q *search.SearchQuery) (*search.SearchResult, error) {
+	where, args := buildWhereClause(*q)
 
 	// Count total
 	countSQL := fmt.Sprintf("SELECT count() FROM logs %s", where)

@@ -10,6 +10,7 @@ import (
 	"github.com/logstorm/api/internal/modules/health"
 	"github.com/logstorm/api/internal/modules/ingestion"
 	"github.com/logstorm/api/internal/modules/project"
+	"github.com/logstorm/api/internal/modules/search"
 )
 
 func SetupRouter(
@@ -21,6 +22,7 @@ func SetupRouter(
 	apiKeyHandler *apikey.APIKeyHandler,
 	apiKeyMiddleware apikey.Middleware,
 	ingestionHandler *ingestion.IngestionHandler,
+	searchHandler *search.SearchHandler,
 ) *gin.Engine {
 	router := gin.New()
 
@@ -38,6 +40,7 @@ func SetupRouter(
 	protected := api.Group("", authMiddleware.Authenticate)
 	project.RegisterRoutes(protected, projectHandler)
 	apikey.RegisterRoutes(protected, apiKeyHandler)
+	search.RegisterSearchRoutes(protected, searchHandler)
 
 	// SDK ingestion routes — authenticated by X-API-Key, not JWT
 	sdkGroup := api.Group("", apiKeyMiddleware.ValidateAPIKey)
