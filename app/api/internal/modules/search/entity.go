@@ -56,5 +56,8 @@ func (q *SearchQuery) Validate() error {
 	if q.From.After(q.To) {
 		return fmt.Errorf("%w: from must be before to", ErrValidation)
 	}
+	if q.Offset < 0 {
+		return fmt.Errorf("%w: offset must be non-negative", ErrValidation)
+	}
 	return nil
 }

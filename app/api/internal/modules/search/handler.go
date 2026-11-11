@@ -13,11 +13,11 @@ import (
 )
 
 type SearchHandler struct {
-	svc SearchService
+	svc *SearchService
 }
 
 func NewSearchHandler(searchService *SearchService) *SearchHandler {
-	return &SearchHandler{svc: *searchService}
+	return &SearchHandler{svc: searchService}
 }
 
 func (h *SearchHandler) SearchLogs(c *gin.Context) {

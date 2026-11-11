@@ -23,7 +23,7 @@ func (r *ClickHouseLogRepository) Search(ctx context.Context, q *search.SearchQu
 	// Count total
 	countSQL := fmt.Sprintf("SELECT count() FROM logs %s", where)
 	row := r.conn.QueryRow(ctx, countSQL, args...)
-	var total int64
+	var total uint64
 	if err := row.Scan(&total); err != nil {
 		return nil, fmt.Errorf("count logs: %w", err)
 	}
@@ -46,7 +46,7 @@ func (r *ClickHouseLogRepository) Search(ctx context.Context, q *search.SearchQu
 	}
 	defer rows.Close()
 
-	var logs []*search.LogRecord
+	logs := make([]*search.LogRecord, 0)
 	for rows.Next() {
 		var log search.LogRecord
 		if err := rows.ScanStruct(&log); err != nil {
@@ -58,7 +58,7 @@ func (r *ClickHouseLogRepository) Search(ctx context.Context, q *search.SearchQu
 		return nil, fmt.Errorf("iterate log rows: %w", err)
 	}
 
-	return &search.SearchResult{Logs: logs, Total: total}, nil
+	return &search.SearchResult{Logs: logs, Total: int64(total)}, nil
 }
 
 func buildWhereClause(q search.SearchQuery) (string, []any) {
@@ -78,8 +78,8 @@ func buildWhereClause(q search.SearchQuery) (string, []any) {
 		args = append(args, q.Service)
 	}
 	if q.Text != "" {
-		conditions = append(conditions, "message ILIKE ?")
-		args = append(args, "%"+q.Text+"%")
+		conditions = append(conditions, "positionCaseInsensitive(message, ?) > 0")
+		args = append(args, q.Text)
 	}
 
 	return "WHERE " + strings.Join(conditions, " AND "), args

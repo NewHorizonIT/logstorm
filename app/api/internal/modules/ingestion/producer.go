@@ -22,7 +22,7 @@ type RedpandaProducer struct {
 func NewRedpandaProducer(brokers []string, topic, dlqTopic string, log zerolog.Logger) (*RedpandaProducer, error) {
 	client, err := kgo.NewClient(
 		kgo.SeedBrokers(brokers...),
-		kgo.RequiredAcks(kgo.LeaderAck()),
+		kgo.RequiredAcks(kgo.AllISRAcks()),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create redpanda client: %w", err)
