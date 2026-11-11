@@ -1,0 +1,25 @@
+meta {
+  name: Search Logs
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/search/{{projectId}}/logs
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+params:query {
+  level: info
+  service: auth-service
+  text: logged in
+  from: 2024-01-01T00:00:00Z
+  to: 2024-12-31T23:59:59Z
+  limit: 50
+  offset: 0
+}

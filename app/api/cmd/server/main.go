@@ -11,6 +11,8 @@ import (
 	"github.com/logstorm/api/internal/modules/ingestion"
 	"github.com/logstorm/api/internal/modules/project"
 	projectpostgres "github.com/logstorm/api/internal/modules/project/postgres"
+	"github.com/logstorm/api/internal/modules/search"
+	searchchmod "github.com/logstorm/api/internal/modules/search/clickhouse"
 	"github.com/logstorm/api/internal/modules/user"
 	userpostgres "github.com/logstorm/api/internal/modules/user/postgres"
 )
@@ -27,5 +29,7 @@ func main() {
 		apikey.Module,
 		apikeypostgres.Module,
 		ingestion.Module,
+		search.Module,
+		searchchmod.Module,
 	).Run()
 }
