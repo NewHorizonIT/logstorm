@@ -61,3 +61,7 @@ migrate-version:
 	-path $(MIGRATION_DIR) \
 	-database "$(DB_URL)" \
 	version
+
+run-fe:
+	@echo "Running Frontend..."
+	cd app/web && npm run dev

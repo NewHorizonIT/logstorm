@@ -5,6 +5,51 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* LogStorm backgrounds */
+  --color-bg-base: var(--ls-bg-base);
+  --color-bg-sidebar: var(--ls-bg-sidebar);
+  --color-bg-inset: var(--ls-bg-inset);
+  --color-surface: var(--ls-surface);
+  --color-surface-active: var(--ls-surface-active);
+  --color-avatar: var(--ls-avatar);
+
+  /* LogStorm borders */
+  --color-border-divider: var(--ls-border-divider);
+  --color-border-card: var(--ls-border-card);
+  --color-border-input: var(--ls-border-input);
+  --color-border-strong: var(--ls-border-strong);
+
+  /* LogStorm text */
+  --color-text-primary: var(--ls-text-primary);
+  --color-text-secondary: var(--ls-text-secondary);
+  --color-text-muted: var(--ls-text-muted);
+  --color-text-subtle: var(--ls-text-subtle);
+  --color-text-disabled: var(--ls-text-disabled);
+
+  /* LogStorm accent — same in both modes */
+  --color-accent-brand: #7442ff;
+  --color-accent-focus: #5b8bcf;
+  --color-accent-light: #a9c2ff;
+
+  /* LogStorm status — same in both modes */
+  --color-status-info: #9d99ff;
+  --color-status-info-bg: rgba(122, 102, 255, 0.14);
+  --color-status-success: #14b797;
+  --color-status-success-bg: rgba(20, 183, 151, 0.14);
+  --color-status-warning: #fbbf24;
+  --color-status-warning-bg: rgba(251, 191, 36, 0.14);
+  --color-status-danger: #f87171;
+  --color-status-danger-bg: rgba(248, 113, 113, 0.14);
+  --color-status-neutral: #9ca3af;
+  --color-status-neutral-bg: rgba(156, 163, 175, 0.14);
+
+  /* LogStorm border radius */
+  --radius-badge: 4px;
+  --radius-control: 6px;
+  --radius-input: 8px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -49,6 +94,25 @@
 }
 
 :root {
+  /* LogStorm light mode */
+  --ls-bg-base: #f8fafc;
+  --ls-bg-sidebar: #f1f5f9;
+  --ls-bg-inset: #e8edf2;
+  --ls-surface: #ffffff;
+  --ls-surface-active: #eef2ff;
+  --ls-avatar: #dde3ed;
+
+  --ls-border-divider: #e2e8f0;
+  --ls-border-card: #e5e7eb;
+  --ls-border-input: #cbd5e1;
+  --ls-border-strong: #94a3b8;
+
+  --ls-text-primary: #0f172a;
+  --ls-text-secondary: #334155;
+  --ls-text-muted: #64748b;
+  --ls-text-subtle: #94a3b8;
+  --ls-text-disabled: #cbd5e1;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -84,6 +148,25 @@
 }
 
 .dark {
+  /* LogStorm dark mode */
+  --ls-bg-base: #080018;
+  --ls-bg-sidebar: #0f1215;
+  --ls-bg-inset: #101318;
+  --ls-surface: #131618;
+  --ls-surface-active: #141e25;
+  --ls-avatar: #2a3242;
+
+  --ls-border-divider: #1e222a;
+  --ls-border-card: #23272f;
+  --ls-border-input: #2d3338;
+  --ls-border-strong: #363a45;
+
+  --ls-text-primary: #e4e8e8;
+  --ls-text-secondary: #c9c0d3;
+  --ls-text-muted: #9ca3af;
+  --ls-text-subtle: #8b93a1;
+  --ls-text-disabled: #687288;
+
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
