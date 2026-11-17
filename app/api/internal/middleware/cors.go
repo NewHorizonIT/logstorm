@@ -9,12 +9,13 @@ import (
 )
 
 const (
-	HeaderOrigin              = "Origin"
-	AccessControlAllowOrigin  = "Access-Control-Allow-Origin"
-	Vary                      = "Vary"
-	Origin                    = "Origin"
-	AccessControlAllowMethods = "Access-Control-Allow-Methods"
-	AccessControlAllowHeaders = "Access-Control-Allow-Headers"
+	HeaderOrigin                  = "Origin"
+	AccessControlAllowOrigin      = "Access-Control-Allow-Origin"
+	AccessControlAllowCredentials = "Access-Control-Allow-Credentials"
+	Vary                          = "Vary"
+	Origin                        = "Origin"
+	AccessControlAllowMethods     = "Access-Control-Allow-Methods"
+	AccessControlAllowHeaders     = "Access-Control-Allow-Headers"
 )
 
 func CORS(cfg config.CORSConfig) gin.HandlerFunc {
@@ -38,6 +39,14 @@ func CORS(cfg config.CORSConfig) gin.HandlerFunc {
 			return
 		}
 
+		c.Next()
+	}
+}
+
+// AllowCredentials sets Access-Control-Allow-Credentials on routes that use cookie auth (e.g. /auth/).
+func AllowCredentials() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header(AccessControlAllowCredentials, "true")
 		c.Next()
 	}
 }
