@@ -1,6 +1,8 @@
 package bootstrap
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/logstorm/api/internal/config"
 	"github.com/logstorm/api/internal/logger"
@@ -28,16 +30,24 @@ func SetupRouter(
 ) *gin.Engine {
 	router := gin.New()
 
+	// CORS at engine level so preflight OPTIONS requests are handled before route matching
+	router.Use(middleware.CORS(cfg.CORS))
+	router.OPTIONS("/*path", func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+
 	api := router.Group(cfg.Server.BasePath)
 
 	api.Use(
 		middleware.Recovery(*log.Zerolog),
 		logger.RequestLogger(*log.Zerolog),
-		middleware.CORS(cfg.CORS),
 	)
 
 	health.RegisterRoutes(api)
-	auth.RegisterRoutes(api, authHandler)
+
+	//set Allow-Credentials
+	authGroup := api.Group("", middleware.AllowCredentials())
+	auth.RegisterRoutes(authGroup, authHandler)
 
 	protected := api.Group("", authMiddleware.Authenticate)
 	project.RegisterRoutes(protected, projectHandler)
