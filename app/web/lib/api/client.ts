@@ -45,10 +45,8 @@ export const api = ky.create({
         try {
           const token = await doRefresh();
           useAuthStore.getState().setToken(token);
-
-          const headers = new Headers(request.headers);
-          headers.set("Authorization", `Bearer ${token}`);
-          return ky.retry({ request: new Request(request, { headers }), code: "TOKEN_REFRESHED" });
+          // beforeRequest will inject the refreshed token on the retry
+          return ky.retry({ code: "TOKEN_REFRESHED" });
         } catch {
           useAuthStore.getState().clearAuth();
         }

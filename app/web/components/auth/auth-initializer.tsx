@@ -13,15 +13,14 @@ export function AuthInitializer() {
     async function init() {
       try {
         const { data } = await getMeApi();
-        // Interceptor may have refreshed the token — read the latest from store
-        const token = useAuthStore.getState().accessToken;
-        if (token) {
-          setAuth(token, {
-            id: data.id,
-            email: data.email,
-            fullName: data.full_name,
-          });
-        }
+        // Token is guaranteed present: either it was in the store before the call,
+        // or the 401 interceptor refreshed and stored it before getMeApi resolved.
+        const token = useAuthStore.getState().accessToken!;
+        setAuth(token, {
+          id: data.id,
+          email: data.email,
+          fullName: data.full_name,
+        });
       } catch {
         clearAuth();
       }
