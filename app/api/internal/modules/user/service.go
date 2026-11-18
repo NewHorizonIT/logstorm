@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/mail"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 type CreateUserInput struct {
@@ -50,4 +52,8 @@ func (s *UserService) CreateUser(ctx context.Context, input CreateUserInput) (*U
 
 func (s *UserService) GetByEmail(ctx context.Context, email string) (*User, error) {
 	return s.repo.GetByEmail(ctx, strings.TrimSpace(email))
+}
+
+func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*User, error) {
+	return s.repo.GetByID(ctx, id)
 }

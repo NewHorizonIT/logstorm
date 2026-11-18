@@ -139,7 +139,7 @@ func (h *AuthHandler) setRefreshCookie(c *gin.Context, rawToken string) {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   h.secure,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 	})
 }
 
@@ -151,7 +151,7 @@ func (h *AuthHandler) clearRefreshCookie(c *gin.Context) {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   h.secure,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 	})
 }
 
