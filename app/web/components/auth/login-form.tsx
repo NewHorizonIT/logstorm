@@ -32,8 +32,8 @@ export function LoginForm() {
   async function onSubmit(data: LoginInput) {
     setFormError(null);
     try {
-      const res = await loginApi(data);
-      setAuth(res.access_token, {
+      const { data: tokenData } = await loginApi(data);
+      setAuth(tokenData.access_token, {
         id: "",
         email: data.email,
         fullName: "",

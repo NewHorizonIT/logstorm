@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/api/client";
+import { authApi, wrapKyError } from "@/lib/api/client";
 
 export interface TokenResponse {
   access_token: string;
@@ -16,22 +16,13 @@ export interface UserResponse {
 }
 
 export function loginApi(input: { email: string; password: string }) {
-  return apiRequest<TokenResponse>("/auth/login", {
-    method: "POST",
-    body: input,
-  });
+  return wrapKyError(() =>
+    authApi.post("auth/login", { json: input }).json<{ data: TokenResponse }>(),
+  );
 }
 
 export function registerApi(input: { full_name: string; email: string; password: string }) {
-  return apiRequest<UserResponse>("/auth/register", {
-    method: "POST",
-    body: input,
-  });
-}
-
-export function refreshApi() {
-  return apiRequest<TokenResponse>("/auth/refresh", {
-    method: "POST",
-    credentials: "include",
-  });
+  return wrapKyError(() =>
+    authApi.post("auth/register", { json: input }).json<{ data: UserResponse }>(),
+  );
 }

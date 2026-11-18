@@ -14,6 +14,7 @@ import (
 	"github.com/logstorm/api/internal/modules/ingestion"
 	"github.com/logstorm/api/internal/modules/project"
 	"github.com/logstorm/api/internal/modules/search"
+	"github.com/logstorm/api/internal/modules/user"
 )
 
 func SetupRouter(
@@ -21,6 +22,7 @@ func SetupRouter(
 	log *logger.Logger,
 	authHandler *auth.AuthHandler,
 	authMiddleware auth.Middleware,
+	userHandler *user.UserHandler,
 	projectHandler *project.ProjectHandler,
 	apiKeyHandler *apikey.APIKeyHandler,
 	apiKeyMiddleware apikey.Middleware,
@@ -50,6 +52,7 @@ func SetupRouter(
 	auth.RegisterRoutes(authGroup, authHandler)
 
 	protected := api.Group("", authMiddleware.Authenticate)
+	user.RegisterRoutes(protected, userHandler)
 	project.RegisterRoutes(protected, projectHandler)
 	apikey.RegisterRoutes(protected, apiKeyHandler)
 	search.RegisterSearchRoutes(protected, searchHandler)
