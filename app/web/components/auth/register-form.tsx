@@ -49,8 +49,8 @@ export function RegisterForm() {
     }
 
     try {
-      const tokenRes = await loginApi({ email: data.email, password: data.password });
-      setAuth(tokenRes.access_token, {
+      const { data: tokenData } = await loginApi({ email: data.email, password: data.password });
+      setAuth(tokenData.access_token, {
         id: "",
         email: data.email,
         fullName: data.full_name,
