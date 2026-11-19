@@ -24,6 +24,7 @@ func CORS(cfg config.CORSConfig) gin.HandlerFunc {
 
 		if origin != "" && isAllowedOrigin(origin, cfg.AllowedOrigins) {
 			c.Header(AccessControlAllowOrigin, origin)
+			c.Header(AccessControlAllowCredentials, "true")
 			c.Header(Vary, Origin)
 		}
 

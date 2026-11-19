@@ -47,8 +47,7 @@ func SetupRouter(
 
 	health.RegisterRoutes(api)
 
-	//set Allow-Credentials
-	authGroup := api.Group("", middleware.AllowCredentials())
+	authGroup := api.Group("")
 	auth.RegisterRoutes(authGroup, authHandler)
 
 	protected := api.Group("", authMiddleware.Authenticate)
