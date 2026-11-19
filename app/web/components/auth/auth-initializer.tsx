@@ -8,13 +8,12 @@ import { useAuthStore } from "@/store/auth";
 export function AuthInitializer() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const clearAuth = useAuthStore((s) => s.clearAuth);
+  const setAuthReady = useAuthStore((s) => s.setAuthReady);
 
   useEffect(() => {
     async function init() {
       try {
         const { data } = await getMeApi();
-        // Token is guaranteed present: either it was in the store before the call,
-        // or the 401 interceptor refreshed and stored it before getMeApi resolved.
         const token = useAuthStore.getState().accessToken!;
         setAuth(token, {
           id: data.id,
@@ -23,6 +22,8 @@ export function AuthInitializer() {
         });
       } catch {
         clearAuth();
+      } finally {
+        setAuthReady();
       }
     }
 

@@ -2,7 +2,6 @@
 
 import { useTheme } from "next-themes";
 import { Sun, Moon, Monitor } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 

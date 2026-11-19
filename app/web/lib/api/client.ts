@@ -29,7 +29,7 @@ async function doRefresh(): Promise<string> {
 
 export const api = ky.create({
   prefix: API_PREFIX,
-  retry: { limit: 0 },
+  retry: { limit: 1 },
   hooks: {
     beforeRequest: [
       ({ request }) => {
@@ -38,18 +38,25 @@ export const api = ky.create({
       },
     ],
     afterResponse: [
-      async ({ request, response, retryCount }) => {
+      async ({ response, retryCount }) => {
         // Only attempt refresh once (retryCount === 0 prevents infinite loop)
         if (response.status !== 401 || retryCount > 0) return;
 
+        let token: string;
         try {
-          const token = await doRefresh();
-          useAuthStore.getState().setToken(token);
-          // beforeRequest will inject the refreshed token on the retry
-          return ky.retry({ code: "TOKEN_REFRESHED" });
+          token = await doRefresh();
         } catch {
           useAuthStore.getState().clearAuth();
+          if (typeof window !== "undefined") {
+            window.location.replace("/login");
+          }
+          return;
         }
+
+        useAuthStore.getState().setToken(token);
+        // ky.retry() returns a RetryMarker — signals ky to re-run the original request.
+        // beforeRequest will inject the new token. Requires retry.limit >= 1.
+        return ky.retry({ code: "TOKEN_REFRESHED" });
       },
     ],
   },
