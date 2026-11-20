@@ -38,7 +38,7 @@ export const api = ky.create({
       },
     ],
     afterResponse: [
-      async ({ response, retryCount }) => {
+      async ({ request, response, retryCount }) => {
         // Only attempt refresh once (retryCount === 0 prevents infinite loop)
         if (response.status !== 401 || retryCount > 0) return;
 
@@ -54,9 +54,12 @@ export const api = ky.create({
         }
 
         useAuthStore.getState().setToken(token);
-        // ky.retry() returns a RetryMarker — signals ky to re-run the original request.
-        // beforeRequest will inject the new token. Requires retry.limit >= 1.
-        return ky.retry({ code: "TOKEN_REFRESHED" });
+        // ky.retry() re-uses the cloned original request — beforeRequest is NOT re-run,
+        // so the new token never reaches the Authorization header. Bypass ky and fetch
+        // directly, manually injecting the new token.
+        const headers = new Headers(request.headers);
+        headers.set("Authorization", `Bearer ${token}`);
+        return fetch(new Request(request, { headers }));
       },
     ],
   },
