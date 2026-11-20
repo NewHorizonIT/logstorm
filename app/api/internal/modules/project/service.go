@@ -82,6 +82,10 @@ func (s *ProjectService) GetProject(ctx context.Context, id, ownerID uuid.UUID) 
 	return s.repo.GetByID(ctx, id, ownerID)
 }
 
+func (s *ProjectService) GetProjectBySlug(ctx context.Context, slug string, ownerID uuid.UUID) (*Project, error) {
+	return s.repo.GetByOwnerAndSlug(ctx, ownerID, slug)
+}
+
 func (s *ProjectService) ListProjects(ctx context.Context, ownerID uuid.UUID) ([]*Project, error) {
 	return s.repo.ListByOwner(ctx, ownerID)
 }

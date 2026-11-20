@@ -111,6 +111,23 @@ func (h *ProjectHandler) Get(c *gin.Context) {
 	response.OK(c, toProjectResponse(proj))
 }
 
+func (h *ProjectHandler) GetBySlug(c *gin.Context) {
+	ownerID, ok := auth.UserIDFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "MISSING_TOKEN", "authentication required")
+		return
+	}
+
+	slug := c.Param("slug")
+	proj, err := h.svc.GetProjectBySlug(c.Request.Context(), slug, ownerID)
+	if err != nil {
+		h.handleError(c, err)
+		return
+	}
+
+	response.OK(c, toProjectResponse(proj))
+}
+
 func (h *ProjectHandler) Update(c *gin.Context) {
 	ownerID, ok := auth.UserIDFromContext(c)
 	if !ok {

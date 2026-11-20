@@ -6,6 +6,7 @@ func RegisterRoutes(router *gin.RouterGroup, h *ProjectHandler) {
 	g := router.Group("/projects")
 	g.POST("", h.Create)
 	g.GET("", h.List)
+	g.GET("/slug/:slug", h.GetBySlug)
 	g.GET("/:id", h.Get)
 	g.PUT("/:id", h.Update)
 }
