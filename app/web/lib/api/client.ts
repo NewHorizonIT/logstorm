@@ -38,7 +38,7 @@ export const api = ky.create({
       },
     ],
     afterResponse: [
-      async ({ request, response, retryCount }) => {
+      async ({ response, retryCount }) => {
         // Only attempt refresh once (retryCount === 0 prevents infinite loop)
         if (response.status !== 401 || retryCount > 0) return;
 
