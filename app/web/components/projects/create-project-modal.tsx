@@ -107,7 +107,8 @@ export function CreateProjectModal({ open, onOpenChange }: Props) {
               className="rounded-input border-border-input bg-bg-base text-text-primary placeholder:text-text-disabled focus-visible:border-accent-focus focus-visible:ring-accent-focus/20 h-9 px-3 font-mono text-sm"
             />
             <p className="text-text-muted text-xs">
-              Used in URLs. Lowercase letters, numbers, and hyphens only.
+              Used in URLs. Lowercase letters, numbers, and hyphens only — cannot start or end with
+              a hyphen.
             </p>
           </div>
 

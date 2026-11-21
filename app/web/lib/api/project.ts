@@ -18,3 +18,7 @@ export function getProjectsApi() {
 export function createProjectApi(body: { name: string; slug: string }) {
   return apiRequest<{ data: ProjectResponse }>("/projects", { method: "POST", body });
 }
+
+export function getProjectBySlugApi(slug: string) {
+  return apiRequest<{ data: ProjectResponse }>(`/projects/slug/${slug}`);
+}
