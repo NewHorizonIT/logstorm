@@ -4,12 +4,12 @@ import "time"
 
 type VolumePoint struct {
 	Time  time.Time `json:"time"`
-	Count int64     `json:"count"`
+	Count uint64    `json:"count"`
 }
 
 type LevelBreakdown struct {
 	Level string `json:"level"`
-	Count int64  `json:"count"`
+	Count uint64 `json:"count"`
 }
 
 type RecentError struct {
@@ -21,9 +21,9 @@ type RecentError struct {
 }
 
 type LogStats struct {
-	TotalLogs      int64            `json:"total_logs"`
-	ErrorCount     int64            `json:"error_count"`
-	WarnCount      int64            `json:"warn_count"`
+	TotalLogs      uint64           `json:"total_logs"`
+	ErrorCount     uint64           `json:"error_count"`
+	WarnCount      uint64           `json:"warn_count"`
 	Volume         []VolumePoint    `json:"volume"`
 	LevelBreakdown []LevelBreakdown `json:"level_breakdown"`
 	RecentErrors   []RecentError    `json:"recent_errors"`
