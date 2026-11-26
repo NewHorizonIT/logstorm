@@ -108,3 +108,12 @@ func (p *RedpandaProducer) PublishDLQ(_ context.Context, key string, data []byte
 
 	return nil
 }
+
+func (p *RedpandaProducer) PublishBatch(ctx context.Context, events []*LogEvent) error {
+	for _, event := range events {
+		if err := p.Publish(ctx, event); err != nil {
+			return err
+		}
+	}
+	return nil
+}

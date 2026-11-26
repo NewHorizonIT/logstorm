@@ -21,13 +21,22 @@ import (
 // --- fake publisher ---
 
 type fakePublisher struct {
-	publishFn func(ctx context.Context, event *ingestion.LogEvent) error
+	publishFn      func(ctx context.Context, event *ingestion.LogEvent) error
+	publishBatchFn func(ctx context.Context, events []*ingestion.LogEvent) error
 }
 
 func (f *fakePublisher) Publish(ctx context.Context, event *ingestion.LogEvent) error {
 	if f.publishFn != nil {
 		return f.publishFn(ctx, event)
 	}
+	return nil
+}
+
+func (f *fakePublisher) PublishBatch(ctx context.Context, events []*ingestion.LogEvent) error {
+	if f.publishBatchFn != nil {
+		return f.publishBatchFn(ctx, events)
+	}
+
 	return nil
 }
 
