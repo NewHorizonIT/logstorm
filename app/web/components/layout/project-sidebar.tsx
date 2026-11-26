@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Broadcast,
   ChartBar,
   Lightning,
   List,
@@ -27,6 +28,7 @@ function projectNavItems(slug: string): NavItem[] {
   return [
     { icon: ChartBar, label: "Dashboard", href: `/projects/${slug}/dashboard` },
     { icon: List, label: "Logs", href: `/projects/${slug}/logs` },
+    { icon: Broadcast, label: "Live Tail", href: `/projects/${slug}/live-tail` },
     { icon: Key, label: "API Keys", href: `/projects/${slug}/api-keys` },
     { icon: Gear, label: "Settings", href: `/projects/${slug}/settings` },
   ];
