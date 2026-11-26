@@ -9,6 +9,7 @@ import (
 	"github.com/logstorm/api/internal/modules/auth"
 	authpostgres "github.com/logstorm/api/internal/modules/auth/postgres"
 	"github.com/logstorm/api/internal/modules/ingestion"
+	"github.com/logstorm/api/internal/modules/livetail"
 	"github.com/logstorm/api/internal/modules/project"
 	projectpostgres "github.com/logstorm/api/internal/modules/project/postgres"
 	"github.com/logstorm/api/internal/modules/dashboard"
@@ -31,6 +32,7 @@ func main() {
 		apikey.Module,
 		apikeypostgres.Module,
 		ingestion.Module,
+		livetail.Module,
 		search.Module,
 		searchchmod.Module,
 		dashboard.Module,

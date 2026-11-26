@@ -63,3 +63,4 @@ redpanda:
   topic: logstorm.logs
   group_id: logstorm.processor
   dlq_topic: logstorm.logs.dlq
+  livetail_group_id: logstorm.livetail
