@@ -94,3 +94,7 @@ func (input *IngestLogInput) ToLogEvent(projectID uuid.UUID, source string) (*Lo
 		Attributes:  attrs,
 	}, nil
 }
+
+type IngestBatchInput struct {
+	Events []IngestLogInput `json:"events" binding:"required,min=1,max=1000"`
+}
